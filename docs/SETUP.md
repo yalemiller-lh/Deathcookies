@@ -4,8 +4,11 @@ Everything runs on free plans, with no card on file:
 
 - **Firebase (free Spark plan)**: Google sign-in, the Firestore database, and
   hosting of the app.
-- **GitHub Actions**: `.github/workflows/reminders.yml` runs `sender/` every
-  15 minutes to send the daily reminder. Free while the repository is public.
+- **GitHub Actions** (free while the repository is public):
+  - `.github/workflows/reminders.yml` runs `sender/` every 15 minutes to send
+    the daily reminder.
+  - `.github/workflows/deploy.yml` checks, builds and publishes the app
+    whenever app code reaches `main`.
 
 Until `src/app/firebaseConfig.ts` has a config, the app runs on on-device
 storage only (no sign-in, no sync, no notifications).
@@ -30,17 +33,18 @@ Then (done by Claude): register a web app in the project, copy its config into
 (sign-in on iPhone home-screen apps needs the app and the sign-in pages on the
 same domain), and put the project id in `.firebaserc`.
 
-## 3. Give the reminder sender access (once per project)
+## 3. Give GitHub access (once per project)
 
-The sender needs two repository secrets: GitHub → the repository →
+Both workflows use repository secrets: GitHub → the repository →
 **Settings → Secrets and variables → Actions → New repository secret**.
 
 1. **FIREBASE_SERVICE_ACCOUNT**: a key for a service account that can only use
-   the database.
+   the database (for reminders) and publish the site (for deploys).
    - https://console.cloud.google.com/iam-admin/serviceaccounts → pick the
      Firebase project → **Create service account**, name it
-     `deathcookies-reminders`.
-   - Role: **Cloud Datastore User** → Done.
+     `deathcookies-github`.
+   - Roles: **Cloud Datastore User**, then **+ Add another role** →
+     **Firebase Hosting Admin** → Done.
    - Open it → **Keys → Add key → Create new key → JSON**. A file downloads.
    - Paste the file's whole contents as the secret, then delete the file.
 2. **VAPID_PRIVATE_KEY**: the Web Push private key, in
@@ -50,9 +54,13 @@ The sender needs two repository secrets: GitHub → the repository →
    lost, generate a new pair, update both, and every device re-allows
    notifications.
 
-Until both secrets exist, the workflow skips each run quietly.
+Until the secrets exist, both workflows skip quietly.
 
 ## 4. Check, build and deploy the app
+
+Pushing app code to `main` does this automatically (Actions → **Deploy**), and
+a running app shows "A new version is ready" with an **Update** button once the
+new build is live. To deploy by hand from this computer instead:
 
 ```bash
 node node_modules/typescript/bin/tsc --noEmit
@@ -64,8 +72,10 @@ node node_modules/firebase-tools/lib/bin/firebase.js deploy
 ```
 
 (`npm run deploy` does the same where npm works.) This publishes the app and
-the database rules. The reminder sender needs no deploy: GitHub runs whatever
-is on `main`.
+the database rules. **The automatic deploy publishes the app only**: after
+changing `firestore.rules`, deploy the rules by hand with
+`firebase deploy --only firestore`. The reminder sender needs no deploy:
+GitHub runs whatever is on `main`.
 
 ## 5. Install on the phone
 

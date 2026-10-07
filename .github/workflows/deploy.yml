@@ -1,0 +1,66 @@
+# Publishes the app to https://deathcookies-4c3ca.web.app whenever app code
+# reaches main: checks (types, lint, tests), build, then a Firebase Hosting
+# deploy. Database rules are deployed by hand when they change (docs/SETUP.md).
+# Uses the FIREBASE_SERVICE_ACCOUNT secret, which needs the Firebase Hosting
+# Admin role as well as Cloud Datastore User.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.github/workflows/reminders.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Until the secret exists, skip quietly instead of failing every push.
+      - id: setup
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::FIREBASE_SERVICE_ACCOUNT is not set yet, so nothing was deployed."
+          fi
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      - if: steps.setup.outputs.ready == 'true'
+        uses: actions/checkout@v5
+      - if: steps.setup.outputs.ready == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            sender/package-lock.json
+      - if: steps.setup.outputs.ready == 'true'
+        run: |
+          npm ci --no-audit --no-fund
+          npm ci --no-audit --no-fund --prefix sender
+      - if: steps.setup.outputs.ready == 'true'
+        name: Check
+        run: npm run check
+      - if: steps.setup.outputs.ready == 'true'
+        name: Build
+        run: npx vite build
+      - if: steps.setup.outputs.ready == 'true'
+        name: Deploy to Firebase Hosting
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/deploy-key.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/deploy-key.json" npx firebase deploy --only hosting --non-interactive --project deathcookies-4c3ca --message "$GITHUB_SHA"
+          rm -f "$RUNNER_TEMP/deploy-key.json"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

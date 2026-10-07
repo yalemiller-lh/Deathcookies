@@ -19,7 +19,7 @@ laptop browser, backed by Firebase.
 | App | React + TypeScript + Vite, installable PWA | One codebase for phone and laptop; testable on this PC |
 | Sign-in | Firebase Auth, Google account | Same data on every device; no passwords to manage |
 | Database | Cloud Firestore | Hosted; syncs phone ⇄ laptop live; keeps working offline and catches up |
-| Hosting | Firebase Hosting | Serves the app and Google sign-in from one domain (needed for sign-in inside an iPhone home-screen app) |
+| Hosting | Firebase Hosting, published by `.github/workflows/deploy.yml` on every push to main | Serves the app and sign-in pages from one domain; open apps offer "Update" when a newer build is live |
 | Notifications | Standard Web Push (VAPID), sent by `sender/` from a GitHub Actions schedule every 15 min | Works on iPhone (home-screen app, iOS 16.4+), Android, and desktop Chrome/Edge |
 
 **Everything runs on free plans with no card on file** (decided 2026-10-07):

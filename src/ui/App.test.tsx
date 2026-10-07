@@ -1,6 +1,6 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Backend } from '../app/backend';
 import { parseISODate } from '../domain/dates';
 import { emptyState, type PlannerState } from '../domain/model';
@@ -224,5 +224,21 @@ describe('settings', () => {
     await user.click(screen.getByRole('button', { name: 'Settings' }));
     expect(screen.getByText('Last sent: Tuesday, October 6')).toBeInTheDocument();
     expect(screen.getByText('me@example.com')).toBeInTheDocument();
+  });
+});
+
+describe('new version banner', () => {
+  it('offers a reload once a newer version is live', async () => {
+    const base = emptyState('UTC');
+    const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01' } });
+    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+    let announce = () => {};
+    const reload = vi.fn();
+    render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC"
+      watchUpdates={onUpdate => { announce = onUpdate; return () => {}; }} reload={reload} />);
+    expect(screen.queryByText('A new version is ready.')).not.toBeInTheDocument();
+    act(() => announce());
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Update' }));
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });
