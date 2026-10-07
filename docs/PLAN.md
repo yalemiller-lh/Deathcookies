@@ -65,7 +65,8 @@ quarter or promoting an idea never half-apply.
 ```
 users/{uid}                     settings: birthday, timeZone, notificationsOn,
                                 notificationTime, closedQuarterKeys, lastReminderDate
-users/{uid}/cookies/{id}        text, done, createdAt
+users/{uid}/cookies/{id}        text, done, createdAt, completedAt, clearedAt (never deleted;
+                                cleared ones are hidden from the list). Times are timestamps.
 users/{uid}/priorities/{id}     title, category, why, progress, status, adjust?, createdAt
 users/{uid}/projects/{id}       name, priorityId | null, createdAt
 users/{uid}/activity/{id}       date, text, projectId
