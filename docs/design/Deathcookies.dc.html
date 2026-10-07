@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html, body { margin:0; padding:0; background:#000; color-scheme:dark; }
+body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+*, *::before, *::after { box-sizing:border-box; }
+a { color:#f5f5f5; } a:hover { color:#fff; }
+button, input, textarea, select { font:inherit; color:inherit; }
+textarea { resize:vertical; }
+::placeholder { color:#6a6a6a; }
+@keyframes rhythm-toast-in { from { transform:translateY(-20px); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes rhythm-sheet-in { from { transform:translateY(32px); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes rhythm-fade-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes rhythm-dim-in { from { opacity:0; } to { opacity:1; } }
+</style>
+</helmet>
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 16px; background:#000;">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" bare="{{ bare }}" dark="{{ true }}" hint-size="402px,874px">
+<div style="position:absolute; inset:0; background:#000; color:#f5f5f5; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:1.5;">
+
+  <div data-rhythm-scroll="1" style="position:absolute; inset:0; overflow:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding: {{ scrollPad }};">
+  <div style="max-width:560px; margin:0 auto;">
+
+    <sc-if value="{{ onQuarter }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Quarter" style="display:flex; flex-direction:column; gap:24px; animation: rhythm-fade-in .35s ease-out;">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Year {{ yearNumber }} · Quarter {{ quarterNumber }}</div>
+            <h1 style="font-family:'Archivo',sans-serif; font-weight:800; font-size:34px; line-height:1; letter-spacing:-0.03em; text-transform:uppercase; margin:10px 0 0;">{{ todayLabel }}</h1>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:#a8a8a8; margin-top:10px;">{{ weekLine }}</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <p style="font-family:'Archivo',sans-serif; font-weight:600; font-size:19px; line-height:1.3; letter-spacing:-0.01em; margin:0; text-wrap:pretty;">“{{ quoteText }}”</p>
+          <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.06em; color:#a8a8a8;">— {{ quoteBy }}</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; border-bottom:1px solid #262626; padding-bottom:8px;">
+            <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+              <h2 style="font-family:'Archivo',sans-serif; font-size:17px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin:0;">Deathcookies</h2>
+            </div>
+            <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8a8a8a; white-space:nowrap;">{{ cookieCount }}</span>
+          </div>
+          <div style="background:#0f0f0f; border:1px solid #262626; border-radius:4px; display:flex; flex-direction:column;">
+            <sc-for list="{{ cookieRows }}" as="c" hint-placeholder-count="3">
+              <button onClick="{{ c.toggle }}" style="display:flex; align-items:flex-start; gap:14px; text-align:left; width:100%; min-height:52px; padding:14px 16px; background:none; border:0; border-bottom:1px solid #262626; cursor:pointer; color:#f5f5f5;" style-hover="background:#141414;">
+                <span style="flex-shrink:0; width:20px; height:20px; margin-top:2px; border:1.5px solid #f5f5f5; border-radius:2px; transition:background .15s; background: {{ c.boxBg }};"></span>
+                <span style="font-size:15px; line-height:1.45; text-decoration: {{ c.deco }}; color: {{ c.color }};">{{ c.text }}</span>
+              </button>
+            </sc-for>
+            <form onSubmit="{{ addCookie }}" style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; padding:10px 10px 10px 16px;">
+              <input value="{{ cookieText }}" onChange="{{ setCookieText }}" placeholder="Something that cannot wait…" style="min-width:0; min-height:44px; padding:8px 0; border:0; border-bottom:1px solid #333; border-radius:0; background:transparent; color:#f5f5f5; outline:none; font-size:16px;" style-focus="border-color:#f5f5f5;">
+              <button type="submit" style="min-height:44px; padding:8px 14px; border-radius:3px; border:1px solid #333; background:transparent; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="border-color:#f5f5f5;">Add</button>
+            </form>
+          </div>
+          <sc-if value="{{ hasDoneCookies }}" hint-placeholder-val="{{ false }}">
+            <div><button onClick="{{ clearDone }}" style="min-height:44px; padding:0 4px; margin-left:-4px; background:none; border:0; color:#8a8a8a; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase;" style-hover="color:#f5f5f5;">Clear the done ones</button></div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ justClosedVisible }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:10px; padding:16px; background:#0f0f0f; border:1px solid #262626; border-radius:4px;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:700; font-size:18px; line-height:1.2; text-transform:uppercase;">{{ justClosedTitle }}</div>
+            <div style="color:#a8a8a8; font-size:14px; text-wrap:pretty;">{{ justClosedBody }}</div>
+            <div><button onClick="{{ dismissClosed }}" style="min-height:44px; padding:0 4px; margin-left:-4px; background:none; border:0; color:#f5f5f5; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; text-decoration:underline; text-underline-offset:4px;">Okay</button></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showQrCard }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ openQR }}" style="text-align:left; display:flex; flex-direction:column; gap:10px; padding:16px; background:#000; border:1px solid #f5f5f5; border-radius:4px; cursor:pointer; color:#f5f5f5; width:100%;" style-hover="background:#0f0f0f;">
+            <div style="font-family:'Archivo',sans-serif; font-weight:700; font-size:19px; line-height:1.15; letter-spacing:-0.01em; text-transform:uppercase;">{{ qrCardTitle }}</div>
+            <div style="color:#a8a8a8; font-size:14px; text-wrap:pretty;">Look back over each priority and decide what to carry into the next quarter. Ready when you are.</div>
+            <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; font-weight:600;">Begin the quarter review →</span>
+          </button>
+        </sc-if>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; border-bottom:1px solid #262626; padding-bottom:8px;">
+            <h2 style="font-family:'Archivo',sans-serif; font-size:17px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin:0;">Priorities</h2>
+            <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8a8a8a;">{{ priorityCountLabel }}</span>
+          </div>
+
+          <sc-for list="{{ priorityCards }}" as="p" hint-placeholder-count="3">
+            <article style="background:#0f0f0f; border:1px solid #262626; border-radius:4px; padding:14px 16px;">
+              <sc-if value="{{ p.viewing }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                  <button onClick="{{ p.toggle }}" aria-expanded="{{ p.expanded }}" style="text-align:left; display:flex; justify-content:space-between; gap:12px; align-items:flex-start; width:100%; min-height:44px; background:none; border:0; padding:0; cursor:pointer; color:#f5f5f5;">
+                    <div style="display:flex; gap:12px; align-items:flex-start; min-width:0;">
+                      <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; color:#8a8a8a; min-width:22px; padding-top:4px; letter-spacing:.04em;">{{ p.n }}</span>
+                      <div style="min-width:0; display:flex; flex-direction:column; gap:6px;">
+                        <sc-if value="{{ p.hasCategory }}" hint-placeholder-val="{{ true }}">
+                          <span style="align-self:flex-start; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:3px 7px; border:1px solid #f5f5f5; border-radius:2px; color:#f5f5f5;">{{ p.category }}</span>
+                        </sc-if>
+                        <h3 style="font-family:'Archivo',sans-serif; font-size:18px; font-weight:600; margin:0; line-height:1.25; letter-spacing:-0.01em; text-wrap:pretty;">{{ p.title }}</h3>
+                      </div>
+                    </div>
+                    <span style="flex-shrink:0; width:9px; height:9px; border-right:1.5px solid #8a8a8a; border-bottom:1.5px solid #8a8a8a; margin:8px 6px 0 0; transition:transform .2s; transform: {{ p.chevron }};"></span>
+                  </button>
+                  <sc-if value="{{ p.expanded }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; flex-direction:column; gap:12px; padding-top:12px; border-top:1px solid #262626;">
+                      <sc-if value="{{ p.hasAdjust }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid #f5f5f5; border-radius:3px; font-size:14px; line-height:1.4; color:#f5f5f5;"><span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; padding-top:2px;">Adjusted</span><span>{{ p.adjust }}</span></div>
+                      </sc-if>
+                      <sc-for list="{{ p.projects }}" as="j" hint-placeholder-count="2">
+                        <div style="padding:12px 14px; border-radius:3px; background:#161616; border:1px solid #2a2a2a; display:flex; flex-direction:column; gap:3px;">
+                          <div style="font-weight:600; font-size:15px; line-height:1.35;">{{ j.name }}</div>
+                          <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; line-height:1.4; color: {{ j.lastColor }};">{{ j.last }}</div>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ p.noProjects }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:12px 14px; border-radius:3px; border:1px dashed #3a3a3a; color:#8a8a8a; font-size:14px;">No projects connected yet.</div>
+                      </sc-if>
+                      <sc-if value="{{ p.addingProject }}" hint-placeholder-val="{{ false }}">
+                        <form onSubmit="{{ saveProject }}" style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px;">
+                          <input value="{{ newProject }}" onChange="{{ setNewProject }}" placeholder="Project name" style="min-width:0; min-height:46px; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-size:16px;" style-focus="border-color:#f5f5f5;">
+                          <button type="submit" style="min-height:46px; padding:10px 16px; border-radius:3px; border:0; background:#f5f5f5; color:#000; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;">Add</button>
+                        </form>
+                      </sc-if>
+                      <div>
+                        <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Why it matters</div>
+                        <p style="font-size:15px; line-height:1.5; margin:6px 0 0; color:#d0d0d0; text-wrap:pretty;">{{ p.why }}</p>
+                      </div>
+                      <div>
+                        <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Progress would look like</div>
+                        <p style="font-size:15px; line-height:1.5; margin:6px 0 0; color:#d0d0d0; text-wrap:pretty;">{{ p.progress }}</p>
+                      </div>
+                      <div style="display:flex; justify-content:space-between; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <button onClick="{{ p.edit }}" style="min-height:44px; padding:0 4px; margin-left:-4px; background:none; border:0; color:#f5f5f5; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; text-decoration:underline; text-underline-offset:4px;">Edit</button>
+                        <button onClick="{{ p.toggleAddProject }}" style="min-height:44px; padding:0 4px; margin-right:-4px; background:none; border:0; color:#8a8a8a; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase;">{{ p.addProjectLabel }}</button>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ p.editing }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <input value="{{ editTitle }}" onChange="{{ setEditTitle }}" placeholder="The priority, in one line" style="width:100%; min-height:46px; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-family:'Archivo',sans-serif; font-weight:600; font-size:18px;" style-focus="border-color:#f5f5f5;">
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Category</span>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                      <sc-for list="{{ editCategories }}" as="c" hint-placeholder-count="5">
+                        <button onClick="{{ c.pick }}" style="min-height:44px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; padding:8px 12px; border-radius:2px; cursor:pointer; border:1px solid {{ c.border }}; background: {{ c.bg }}; color: {{ c.color }};">{{ c.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <label style="display:flex; flex-direction:column; gap:6px;">
+                    <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Why it matters</span>
+                    <textarea value="{{ editWhy }}" onChange="{{ setEditWhy }}" rows="3" placeholder="The reason you would give a friend" style="width:100%; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-size:16px; line-height:1.5;" style-focus="border-color:#f5f5f5;"></textarea>
+                  </label>
+                  <label style="display:flex; flex-direction:column; gap:6px;">
+                    <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Progress would look like</span>
+                    <textarea value="{{ editProgress }}" onChange="{{ setEditProgress }}" rows="3" placeholder="What you would notice by the end of the quarter" style="width:100%; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-size:16px; line-height:1.5;" style-focus="border-color:#f5f5f5;"></textarea>
+                  </label>
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Connected projects</span>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                      <sc-for list="{{ editProjects }}" as="j" hint-placeholder-count="3">
+                        <button onClick="{{ j.toggle }}" style="min-height:44px; font-size:14px; padding:8px 14px; border-radius:3px; cursor:pointer; border:1px solid {{ j.border }}; background: {{ j.bg }}; color: {{ j.color }};">{{ j.name }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; color:#a8a8a8;">{{ editHint }}</span>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button onClick="{{ saveEdit }}" style="flex:1 1 120px; min-height:48px; padding:10px 16px; border-radius:3px; border:0; background:#f5f5f5; color:#000; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="background:#fff;">Save</button>
+                    <button onClick="{{ cancelEdit }}" style="flex:1 1 100px; min-height:48px; padding:10px 14px; border-radius:3px; border:1px solid #333; background:transparent; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="border-color:#f5f5f5;">Cancel</button>
+                    <sc-if value="{{ editCanPause }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ pauseEditing }}" style="flex:1 1 100%; min-height:44px; padding:10px 14px; border-radius:3px; border:0; background:none; color:#8a8a8a; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="color:#f5f5f5;">Set this one aside for now</button>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </article>
+          </sc-for>
+
+          <sc-if value="{{ canAdd }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ startAdd }}" style="text-align:left; min-height:52px; padding:14px 16px; border:1px dashed #3a3a3a; border-radius:4px; background:transparent; cursor:pointer; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; width:100%;" style-hover="border-color:#f5f5f5;">{{ addLabel }}</button>
+          </sc-if>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; border-bottom:1px solid #262626; padding-bottom:8px;">
+            <h2 style="font-family:'Archivo',sans-serif; font-size:17px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin:0;">Backburner</h2>
+            <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8a8a8a; white-space:nowrap;">{{ burnerCount }}</span>
+          </div>
+          <div style="background:#0f0f0f; border:1px solid #262626; border-radius:4px; display:flex; flex-direction:column;">
+            <sc-for list="{{ inboxRows }}" as="i" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:8px; padding:6px 6px 6px 16px; border-bottom:1px solid #262626; min-height:56px;">
+                <span style="flex:1; min-width:0; font-size:15px; line-height:1.45; color:#d0d0d0; text-wrap:pretty;">{{ i.text }}</span>
+                <button onClick="{{ i.promote }}" aria-label="Make it a priority" style="min-height:44px; padding:0 10px; background:none; border:0; color:#f5f5f5; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap;" style-hover="text-decoration:underline;">Prioritise</button>
+                <button onClick="{{ i.remove }}" aria-label="Drop it" style="min-width:44px; min-height:44px; background:none; border:0; color:#6a6a6a; cursor:pointer; font-size:20px; line-height:1;" style-hover="color:#f5f5f5;">×</button>
+              </div>
+            </sc-for>
+            <form onSubmit="{{ addInbox }}" style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; padding:10px 10px 10px 16px;">
+              <input value="{{ inboxText }}" onChange="{{ setInboxText }}" placeholder="An idea to think on…" style="min-width:0; min-height:44px; padding:8px 0; border:0; border-bottom:1px solid #333; border-radius:0; background:transparent; color:#f5f5f5; outline:none; font-size:16px;" style-focus="border-color:#f5f5f5;">
+              <button type="submit" style="min-height:44px; padding:8px 14px; border-radius:3px; border:1px solid #333; background:transparent; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="border-color:#f5f5f5;">Add</button>
+            </form>
+          </div>
+        </div>
+
+        <sc-if value="{{ hasPaused }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; border-bottom:1px solid #262626; padding-bottom:8px;">
+              <h2 style="font-family:'Archivo',sans-serif; font-size:17px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin:0;">Set aside</h2>
+              <span style="color:#8a8a8a; font-size:13px;">Kept, with their notes.</span>
+            </div>
+            <sc-for list="{{ pausedRows }}" as="p" hint-placeholder-count="1">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 8px 8px 16px; border:1px solid #262626; border-radius:4px; background:#0f0f0f;">
+                <span style="font-size:15px; line-height:1.3; color:#d0d0d0;">{{ p.title }}</span>
+                <button onClick="{{ p.resume }}" style="min-height:44px; padding:0 8px; background:none; border:0; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; color: {{ p.resumeColor }};">{{ p.resumeLabel }}</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+      </section>
+    </sc-if>
+
+  </div>
+  </div>
+
+  <sc-if value="{{ promoting }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePromote }}" style="position:absolute; inset:0; z-index:20; background:rgba(0,0,0,.7); display:flex; align-items:flex-end; justify-content:center; animation: rhythm-dim-in .2s ease-out;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:560px; max-height:92%; overflow:auto; background:#0f0f0f; border-top:1px solid #333; padding:12px 20px 44px; display:flex; flex-direction:column; gap:14px; animation: rhythm-sheet-in .35s cubic-bezier(.2,.8,.2,1);">
+        <div style="width:40px; height:3px; background:#333; margin:0 auto 6px;"></div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Change focus now</div>
+        <h2 style="font-family:'Archivo',sans-serif; font-size:22px; font-weight:700; margin:0; line-height:1.2; letter-spacing:-0.01em; text-wrap:pretty;">{{ promoteText }}</h2>
+        <sc-if value="{{ promoteHasRoom }}" hint-placeholder-val="{{ false }}">
+          <p style="margin:0; color:#a8a8a8; text-wrap:pretty;">There is room for one more priority this quarter. You can write down why it matters once it is in.</p>
+          <button onClick="{{ promoteAdd }}" style="min-height:50px; padding:10px 18px; border-radius:3px; border:0; background:#f5f5f5; color:#000; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; width:100%;" style-hover="background:#fff;">{{ promoteAddLabel }}</button>
+        </sc-if>
+        <sc-if value="{{ promoteNoRoom }}" hint-placeholder-val="{{ true }}">
+          <p style="margin:0; color:#a8a8a8; text-wrap:pretty;">You are already holding three. To take this on now, set one aside. It keeps its notes and can come back at any review.</p>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ promoteChoices }}" as="c" hint-placeholder-count="3">
+              <button onClick="{{ c.swap }}" style="text-align:left; display:flex; justify-content:space-between; gap:12px; align-items:center; min-height:52px; padding:12px 14px; border:1px solid #2a2a2a; border-radius:3px; background:#161616; cursor:pointer; color:#f5f5f5; width:100%;" style-hover="border-color:#f5f5f5;">
+                <span style="font-size:15px; line-height:1.3; font-weight:500;">{{ c.title }}</span>
+                <span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#8a8a8a; white-space:nowrap;">Set aside</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <button onClick="{{ closePromote }}" style="min-height:44px; padding:9px 14px; border-radius:3px; border:1px solid #333; background:transparent; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; width:100%;" style-hover="border-color:#f5f5f5;">Not now, keep it here</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showBirthday }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeBirthday }}" style="position:absolute; inset:0; z-index:20; background:rgba(0,0,0,.7); display:flex; align-items:flex-end; justify-content:center; animation: rhythm-dim-in .2s ease-out;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:560px; max-height:92%; overflow:auto; background:#0f0f0f; border-top:1px solid #333; padding:12px 20px 44px; display:flex; flex-direction:column; gap:14px; animation: rhythm-sheet-in .35s cubic-bezier(.2,.8,.2,1);">
+        <div style="width:40px; height:3px; background:#333; margin:0 auto 6px;"></div>
+        <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Your rhythm</div>
+        <h2 style="font-family:'Archivo',sans-serif; font-size:24px; font-weight:800; margin:0; line-height:1.05; letter-spacing:-0.02em; text-transform:uppercase;">Your year starts on your birthday</h2>
+        <p style="margin:0; color:#a8a8a8; text-wrap:pretty;">Four quarters of three months follow from it. Change the date and everything recalculates.</p>
+        <input type="date" value="{{ birthdayDraft }}" onChange="{{ setBirthdayDraft }}" style="width:100%; min-height:48px; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:15px;" style-focus="border-color:#f5f5f5;">
+        <div style="padding:12px 14px; background:#161616; border:1px solid #2a2a2a; border-radius:3px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; line-height:1.5; color:#d0d0d0; text-wrap:pretty;">{{ birthdayPreview }}</div>
+        <div style="display:flex; gap:8px;">
+          <button onClick="{{ saveBirthday }}" style="flex:1; min-height:48px; padding:10px 16px; border-radius:3px; border:0; background:#f5f5f5; color:#000; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="background:#fff;">Save</button>
+          <button onClick="{{ closeBirthday }}" style="flex:1; min-height:48px; padding:10px 14px; border-radius:3px; border:1px solid #333; background:transparent; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;" style-hover="border-color:#f5f5f5;">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showQR }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeQR }}" style="position:absolute; inset:0; z-index:20; background:rgba(0,0,0,.7); display:flex; align-items:flex-end; justify-content:center; animation: rhythm-dim-in .2s ease-out;">
+      <div onClick="{{ stop }}" style="width:100%; max-width:560px; max-height:94%; overflow:auto; background:#0f0f0f; border-top:1px solid #333; padding:12px 20px 44px; display:flex; flex-direction:column; gap:18px; animation: rhythm-sheet-in .35s cubic-bezier(.2,.8,.2,1);">
+        <div style="width:40px; height:3px; background:#333; margin:0 auto 6px;"></div>
+        <div>
+          <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">Quarter review</div>
+          <h2 style="font-family:'Archivo',sans-serif; font-size:28px; font-weight:800; margin:8px 0 0; line-height:1; letter-spacing:-0.03em; text-transform:uppercase;">{{ qrTitle }}</h2>
+          <p style="margin:10px 0 0; color:#a8a8a8; text-wrap:pretty;">{{ qrIntro }}</p>
+        </div>
+        <sc-for list="{{ qrRows }}" as="q" hint-placeholder-count="3">
+          <div style="border-top:1px solid #262626; padding-top:16px; display:flex; flex-direction:column; gap:10px;">
+            <div style="font-size:17px; font-weight:600; line-height:1.25;">{{ q.title }}</div>
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace; color:#8a8a8a; font-size:12px; line-height:1.5; text-wrap:pretty;">Progress was going to look like: {{ q.progress }}</div>
+            <textarea value="{{ q.outcome }}" onChange="{{ q.setOutcome }}" rows="2" placeholder="What actually happened?" style="width:100%; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-size:16px; line-height:1.5;" style-focus="border-color:#f5f5f5;"></textarea>
+            <div style="display:flex; gap:2px; background:#000; border:1px solid #333; padding:2px; border-radius:3px;">
+              <sc-for list="{{ q.options }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" style="flex:1; min-height:44px; padding:8px 10px; border-radius:2px; border:0; cursor:pointer; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; background: {{ o.bg }}; color: {{ o.color }};">{{ o.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ q.isAdjust }}" hint-placeholder-val="{{ false }}">
+              <input value="{{ q.change }}" onChange="{{ q.setChange }}" placeholder="What changes next quarter?" style="width:100%; min-height:46px; padding:10px 12px; border-radius:3px; border:1px solid #333; background:#000; color:#f5f5f5; outline:none; font-size:16px;" style-focus="border-color:#f5f5f5;">
+            </sc-if>
+            <sc-if value="{{ q.isRetire }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:0; color:#a8a8a8; font-size:14px;">Setting something down is a decision, not a failure. Its projects stay on the go.</p>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ qrHasFlagged }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid #262626; padding-top:16px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8a8a8a;">From the backburner, marked for this review</div>
+            <sc-for list="{{ qrFlagged }}" as="f" hint-placeholder-count="1">
+              <div style="font-size:16px; font-weight:500; line-height:1.35; color:#d0d0d0;">{{ f.text }}</div>
+            </sc-for>
+            <p style="margin:4px 0 0; color:#a8a8a8; font-size:14px; text-wrap:pretty;">These stay on the backburner. Once the new quarter begins, bring one in as a priority if it still calls.</p>
+          </div>
+        </sc-if>
+        <div style="display:flex; flex-direction:column; gap:10px; border-top:1px solid #262626; padding-top:16px;">
+          <span style="font-family:'JetBrains Mono',ui-monospace,monospace; color:#8a8a8a; font-size:11px; letter-spacing:.1em; text-transform:uppercase; text-align:center;">{{ qrSummary }}</span>
+          <button onClick="{{ closeQuarter }}" style="min-height:50px; padding:10px 16px; border-radius:3px; border:0; background:#f5f5f5; color:#000; font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; width:100%;" style-hover="background:#fff;">{{ qrCloseLabel }}</button>
+          <button onClick="{{ closeQR }}" style="min-height:44px; padding:9px 14px; border-radius:3px; border:1px solid #333; background:transparent; color:#f5f5f5; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; width:100%;" style-hover="border-color:#f5f5f5;">Come back later</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ toastTap }}" style="position:absolute; left:12px; right:12px; z-index:30; top: {{ toastTop }}; text-align:left; background:rgba(22,22,22,.96); backdrop-filter:blur(12px); border:1px solid #3a3a3a; border-radius:14px; padding:12px 14px; box-shadow:0 12px 40px rgba(0,0,0,.6); display:flex; gap:12px; align-items:flex-start; cursor:pointer; color:#f5f5f5; animation: rhythm-toast-in .45s cubic-bezier(.2,.8,.2,1);">
+      <div style="width:38px; height:38px; border-radius:9px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="width:20px; height:20px; border-radius:50%; background:#000; display:block;"></span></div>
+      <div style="flex:1; min-width:0;">
+        <div style="display:flex; justify-content:space-between; gap:8px;"><span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-weight:600; font-size:11px; letter-spacing:.1em; text-transform:uppercase;">Deathcookies</span><span style="font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; color:#8a8a8a;">now</span></div>
+        <div style="font-size:14px; font-weight:600; margin-top:2px;">{{ toastTitle }}</div>
+        <div style="font-size:14px; color:#a8a8a8; line-height:1.35;">{{ toastBody }}</div>
+      </div>
+    </button>
+  </sc-if>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;frame&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Phone&quot;,&quot;options&quot;:[&quot;Phone&quot;,&quot;Fill the window&quot;],&quot;tsType&quot;:&quot;'Phone' | 'Fill the window'&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;navStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Bottom tabs&quot;,&quot;options&quot;:[&quot;Bottom tabs&quot;,&quot;Top tabs&quot;],&quot;tsType&quot;:&quot;'Bottom tabs' | 'Top tabs'&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Wed Oct 7 — missed Monday&quot;,&quot;options&quot;:[&quot;Wed Oct 7 — missed Monday&quot;,&quot;Mon Oct 12 — review day&quot;,&quot;Thu Oct 29 — quarter closing&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Scenario&quot;},&quot;showReminder&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scenario&quot;}}">
+const MS = 86400000;
+const pad = n => String(n).padStart(2, '0');
+const parseISO = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, m - 1, d); };
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const addMonths = (d, n) => { const f = new Date(d.getFullYear(), d.getMonth() + n, 1); const last = new Date(f.getFullYear(), f.getMonth() + 1, 0).getDate(); f.setDate(Math.min(d.getDate(), last)); return f; };
+const daysBetween = (a, b) => Math.round((b - a) / MS);
+const fmt = (d, o) => d.toLocaleDateString('en-US', o);
+const fmtMD = d => fmt(d, { month: 'long', day: 'numeric' });
+const fmtMDY = d => fmt(d, { month: 'long', day: 'numeric', year: 'numeric' });
+const fmtShort = d => fmt(d, { month: 'short', day: 'numeric' });
+const fmtWk = d => fmt(d, { weekday: 'long', month: 'long', day: 'numeric' });
+const time12 = t => { const [h, m] = String(t || '08:30').split(':').map(Number); return `${((h + 11) % 12) + 1}:${pad(m)} ${h < 12 ? 'am' : 'pm'}`; };
+const SCENARIOS = { 'Wed Oct 7 — missed Monday': '2026-10-07', 'Mon Oct 12 — review day': '2026-10-12', 'Thu Oct 29 — quarter closing': '2026-10-29' };
+const CATEGORIES = ['hobby', 'health', 'career', 'finances', 'relationship'];
+const QUOTES = [
+  { text: 'Begin at once to live, and count each separate day as a separate life.', by: 'Seneca' },
+  { text: 'Waste no more time arguing about what a good man should be. Be one.', by: 'Marcus Aurelius' },
+  { text: 'First say to yourself what you would be; and then do what you have to do.', by: 'Epictetus' },
+  { text: 'Do not wait to strike till the iron is hot; but make it hot by striking.', by: 'W. B. Yeats' },
+  { text: 'He who has a why to live can bear almost any how.', by: 'Friedrich Nietzsche' },
+  { text: 'Little by little, one travels far.', by: 'Proverb' },
+  { text: 'No one ever steps in the same river twice.', by: 'Heraclitus' },
+  { text: 'Well begun is half done.', by: 'Aristotle' },
+];
+const DECISION = {
+  continue: { label: 'Continued', bg: '#f5f5f5', color: '#000', border: '#f5f5f5' },
+  adjust: { label: 'Adjusted', bg: 'transparent', color: '#f5f5f5', border: '#f5f5f5' },
+  retire: { label: 'Retired', bg: 'transparent', color: '#8a8a8a', border: '#3a3a3a' },
+};
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+const SEL = { bg: '#f5f5f5', color: '#000' }, UNSEL = { bg: 'transparent', color: '#8a8a8a' };
+let uid = 100;
+const nid = p => `${p}${uid++}`;
+
+function rhythm(birthday, today) {
+  const b = parseISO(birthday);
+  let start = new Date(today.getFullYear(), b.getMonth(), b.getDate());
+  if (start > today) start = new Date(today.getFullYear() - 1, b.getMonth(), b.getDate());
+  const yearNumber = start.getFullYear() - b.getFullYear();
+  const starts = [0, 1, 2, 3, 4].map(k => addMonths(start, 3 * k));
+  let qi = 0;
+  for (let k = 1; k < 4; k++) if (today >= starts[k]) qi = k;
+  return { yearNumber, qi, start: starts[qi], end: addDays(starts[qi + 1], -1), nextStart: starts[qi + 1], key: `${yearNumber}-${qi}` };
+}
+function quarterAfter(r) {
+  const start = r.nextStart;
+  const yearNumber = r.yearNumber + (r.qi === 3 ? 1 : 0);
+  const qi = (r.qi + 1) % 4;
+  return { yearNumber, qi, start, end: addDays(addMonths(start, 3), -1), nextStart: addMonths(start, 3), key: `${yearNumber}-${qi}` };
+}
+
+class Component extends DCLogic {
+  state = {
+    screen: 'quarter',
+    birthday: '2002-05-01', birthdayDraft: '2002-05-01', showBirthday: false,
+    reminderOn: true, reminderTime: '08:30',
+    priorities: [
+      { id: 'p1', title: 'Finish the garden studio before the cold sets in', category: 'hobby', why: 'A room of my own to practise and write in. Two winters of putting it off is enough.', progress: 'Insulated, windows in, a desk and a lamp. Working out there one morning a week.', status: 'active' },
+      { id: 'p2', title: 'Keep running three mornings a week', category: 'health', why: 'Running is when I think clearly. Last winter I stopped, and felt it everywhere else.', progress: 'Twelve weeks of three runs, however short. An autumn route I actually like.', status: 'active', adjust: 'Autumn version: earlier starts, a route with streetlights.' },
+      { id: 'p3', title: "Start the family history for Grandad's eightieth", category: 'relationship', why: "Nan is 86 and the stories go with her. Grandad's birthday in March makes it real.", progress: 'Three recorded conversations and a rough first chapter.', status: 'active' },
+    ],
+    projects: [
+      { id: 'j1', name: 'Studio insulation & windows', priorityId: 'p1' },
+      { id: 'j2', name: 'Studio electrics', priorityId: 'p1' },
+      { id: 'j3', name: 'Winter running route', priorityId: 'p2' },
+      { id: 'j4', name: 'Conversations with Nan', priorityId: 'p3' },
+      { id: 'j5', name: 'Scan the photo albums', priorityId: 'p3' },
+      { id: 'j6', name: 'Choir autumn concert', priorityId: null },
+    ],
+    activity: [
+      { day: 'Tue', text: 'Windows delivered; fitting booked for the 15th', projectId: 'j1' },
+      { day: 'Tue', text: 'Canal loop, 4 km', projectId: 'j3' },
+      { day: 'Thu', text: '5 km in the rain', projectId: 'j3' },
+      { day: 'Sat', text: 'Forty minutes with Nan about the shop on Mill Street', projectId: 'j4' },
+      { day: 'Sun', text: 'Concert programme draft sent to Helen', projectId: 'j6' },
+    ],
+    cookies: [
+      { id: 'c1', text: "Pay the window fitter's deposit", done: false },
+      { id: 'c2', text: 'Send Helen the final concert copy', done: false },
+      { id: 'c3', text: 'Renew the car tax before the 10th', done: false },
+      { id: 'c4', text: "Book Nan's visit for Saturday", done: true },
+    ],
+    cookieText: '',
+    reviews: [
+      { id: 'r1', date: '2026-09-28', moved: "Windows ordered at last. Three runs, all short. Nan remembered the name of the shop's first owner.", way: 'A long week at work; the evenings disappeared.', still: 0, next: 'Book the window fitter before Friday.' },
+      { id: 'r2', date: '2026-09-21', moved: 'Measured and priced the windows. Two runs. Scanned the first album.', way: 'Rain, mostly. And I kept researching insulation instead of buying it.', still: 0, next: 'Order the insulation and stop reading about it.' },
+      { id: 'r3', date: '2026-09-14', moved: 'Insulation finally bought. Two runs. First proper chat with Nan about the shop.', way: 'A heavy week at work.', still: 0, next: 'Measure for the windows.' },
+      { id: 'r4', date: '2026-08-31', moved: 'Ran three times, the first full week in months. Scanned half an album.', way: 'Back-to-school chaos.', still: 0, next: 'Ask Nan about the shop on Mill Street.' },
+      { id: 'r5', date: '2026-08-17', moved: 'Two runs before the heat. Grandad found a box of letters from the shop.', way: 'Holiday week; everyone home.', still: 0, next: 'Read the letters with Grandad on Sunday.' },
+      { id: 'r6', date: '2026-08-03', moved: 'New quarter. Chose three priorities and wrote down why each one matters.', way: 'Nothing yet; it is day three.', still: 0, next: 'Call Nan and set a date to visit.' },
+      { id: 'r7', date: '2026-07-20', moved: 'Italian every morning this week. Fifteen minutes, but every morning.', way: "Studio: still waiting on the builder's quote.", still: 1, next: 'Chase the quote. Once.' },
+      { id: 'r8', date: '2026-06-15', moved: 'Ran twice. Priced a cabin and hated the price.', way: 'Exams to mark.', still: 0, next: 'Get a builder to quote.' },
+      { id: 'r9', date: '2026-06-01', moved: 'Beds planted. Decided to build the studio rather than buy a cabin.', way: 'Rain and a stiff back.', still: 0, next: 'Sketch the studio floor plan.' },
+      { id: 'r10', date: '2026-05-04', moved: 'First week of the year. Three priorities chosen.', way: 'Not much yet.', still: 0, next: 'Order seedlings.' },
+    ],
+    quarterReviews: [
+      { date: '2026-07-31', decisions: [
+        { title: 'Decide on the studio: build or buy', decision: 'adjust', note: 'Decided: build. The quote finally came and it is doable. Next quarter is about actually starting.' },
+        { title: 'Run three mornings a week', decision: 'adjust', note: 'The spring version worked until the heat. Autumn version: earlier starts, a route with streetlights.' },
+        { title: 'Learn enough Italian for Sicily', decision: 'retire', note: 'The trip happened in July. I ordered coffee and asked directions. Enough.' },
+      ] },
+      { date: '2026-04-30', decisions: [
+        { title: 'Bring the garden back', decision: 'retire', note: 'Done. The beds are in and it is a garden again.' },
+        { title: 'Get through winter without stopping running', decision: 'continue', note: 'It worked, mostly. Carry it into spring as three mornings a week.' },
+        { title: 'Start Italian for Sicily', decision: 'continue', note: 'Slow, but the trip is in July.' },
+      ] },
+    ],
+    inbox: [
+      { id: 'i1', date: '2026-10-03', text: 'A weekend woodworking course. The studio will want shelves.', flagged: false },
+      { id: 'i2', date: '2026-09-26', text: "Cook from Mum's recipe box once a fortnight.", flagged: true },
+      { id: 'i3', date: '2026-09-19', text: 'Learn to read bass clef properly, for choir.', flagged: false },
+    ],
+    inboxText: '',
+    draft: { moved: '', way: '', still: {}, next: '' }, saveHint: 'About ten minutes. Nothing here is graded.',
+    editingId: null, editDraft: null, editHint: '',
+    expanded: {}, addingFor: null, newProject: '',
+    showQR: false, qrDraft: {}, closedKeys: [], justClosed: null,
+    promoteId: null, toast: null,
+  };
+
+  today() { return parseISO(SCENARIOS[this.props.scenario] || SCENARIOS['Wed Oct 7 — missed Monday']); }
+  mondayOf(d) { return addDays(d, -((d.getDay() + 6) % 7)); }
+  scrollTop() { const el = document.querySelector('[data-rhythm-scroll]'); if (el) el.scrollTop = 0; }
+
+  componentDidMount() { this.scheduleToast(900); }
+  componentDidUpdate(prev) {
+    if (prev.scenario !== this.props.scenario || prev.showReminder !== this.props.showReminder) { this.setState({ toast: null }); this.scheduleToast(600); }
+  }
+  componentWillUnmount() { clearTimeout(this.t1); clearTimeout(this.t2); }
+
+  reminderToast() {
+    const n = this.state.cookies.filter(c => !c.done).length;
+    if (n === 0) return { title: 'No deathcookies today', body: 'Plate is clean. Nothing urgent to eat.' };
+    const next = this.state.cookies.find(c => !c.done);
+    return { title: `${n} deathcookie${n === 1 ? '' : 's'} to eat`, body: `Start with: ${next.text}` };
+  }
+  scheduleToast(delay) {
+    clearTimeout(this.t1); clearTimeout(this.t2);
+    if (this.props.showReminder === false) return;
+    this.t1 = setTimeout(() => this.showToast(this.reminderToast()), delay);
+  }
+  showToast(t) { clearTimeout(this.t2); this.setState({ toast: t }); this.t2 = setTimeout(() => this.setState({ toast: null }), 8000); }
+
+  go(screen) { this.setState({ screen, editingId: null, editDraft: null, editHint: '', addingFor: null }); this.scrollTop(); }
+
+  startEdit(p) {
+    this.setState({ editingId: p.id, editHint: '', addingFor: null, editDraft: { title: p.title, category: p.category || '', why: p.why || '', progress: p.progress || '', projectIds: this.state.projects.filter(j => j.priorityId === p.id).map(j => j.id) } });
+  }
+  saveEdit() {
+    const { editingId: id, editDraft: d } = this.state;
+    if (!d) return;
+    if (!d.title.trim()) { this.setState({ editHint: 'Give it a title first, even a rough one.' }); return; }
+    let priorities = this.state.priorities.slice();
+    let pid = id;
+    if (id === 'new') { pid = nid('p'); priorities.push({ id: pid, title: d.title.trim(), category: d.category, why: d.why.trim(), progress: d.progress.trim(), status: 'active' }); }
+    else priorities = priorities.map(p => p.id === id ? { ...p, title: d.title.trim(), category: d.category, why: d.why.trim(), progress: d.progress.trim() } : p);
+    const projects = this.state.projects.map(j => d.projectIds.includes(j.id) ? { ...j, priorityId: pid } : (j.priorityId === pid ? { ...j, priorityId: null } : j));
+    this.setState(s => ({ priorities, projects, editingId: null, editDraft: null, editHint: '', expanded: { ...s.expanded, [pid]: true } }));
+  }
+  setStatus(id, status) { this.setState(s => ({ priorities: s.priorities.map(p => p.id === id ? { ...p, status } : p) })); }
+  setDraft(k, v) { this.setState(s => ({ draft: { ...s.draft, [k]: v } })); }
+  setStill(id, v) { this.setState(s => ({ draft: { ...s.draft, still: { ...s.draft.still, [id]: v } } })); }
+  setQr(pid, patch) { this.setState(s => ({ qrDraft: { ...s.qrDraft, [pid]: { outcome: '', decision: 'continue', change: '', ...(s.qrDraft[pid] || {}), ...patch } } })); }
+
+  saveProject(e) {
+    e.preventDefault();
+    const name = this.state.newProject.trim(), pid = this.state.addingFor;
+    if (!name || !pid) return;
+    this.setState(s => ({ projects: [...s.projects, { id: nid('j'), name, priorityId: pid }], newProject: '', addingFor: null }));
+  }
+
+  saveReview(weekKey) {
+    const d = this.state.draft;
+    if (!d.moved.trim() && !d.way.trim() && !d.next.trim()) { this.setState({ saveHint: 'A line or two is enough; even one word counts.' }); return; }
+    const still = Object.values(d.still).filter(v => v === 'no').length;
+    const review = { id: nid('r'), date: weekKey, moved: d.moved.trim() || '—', way: d.way.trim() || '—', still, next: d.next.trim() || '—' };
+    this.setState(s => ({ reviews: [review, ...s.reviews], draft: { moved: '', way: '', still: {}, next: '' }, saveHint: 'About ten minutes. Nothing here is graded.', toast: null }));
+    this.scrollTop();
+  }
+
+  closeQuarter(q, today, active) {
+    const qd = this.state.qrDraft;
+    const get = p => ({ outcome: '', decision: 'continue', change: '', ...(qd[p.id] || {}) });
+    const decisions = active.map(p => { const d = get(p); return { title: p.title, decision: d.decision, note: [d.outcome.trim(), d.change.trim()].filter(Boolean).join(' Next: ') || 'No notes.' }; });
+    const retired = new Set(active.filter(p => get(p).decision === 'retire').map(p => p.id));
+    const priorities = this.state.priorities.filter(p => !retired.has(p.id)).map(p => {
+      if (p.status !== 'active') return p;
+      const d = get(p);
+      const { adjust, ...rest } = p;
+      return d.decision === 'adjust' && d.change.trim() ? { ...rest, adjust: d.change.trim() } : rest;
+    });
+    const projects = this.state.projects.map(j => retired.has(j.priorityId) ? { ...j, priorityId: null } : j);
+    const closeDate = today <= q.end ? today : q.end;
+    const carried = active.length - retired.size;
+    const next = quarterAfter(q);
+    this.setState(s => ({
+      quarterReviews: [...s.quarterReviews, { date: iso(closeDate), decisions }],
+      priorities, projects, closedKeys: [...s.closedKeys, q.key], showQR: false, qrDraft: {}, screen: 'quarter',
+      draft: { ...s.draft, still: {} },
+      justClosed: { title: `Quarter ${q.qi + 1} is closed.`, body: `Quarter ${next.qi + 1} begins ${fmtMD(next.start)} with ${carried} ${carried === 1 ? 'priority' : 'priorities'} carried forward. Choose the rest when you are ready.` },
+    }));
+    this.scrollTop();
+  }
+
+  promote(item, pauseId) {
+    const pid = nid('p');
+    this.setState(s => ({
+      priorities: [...s.priorities.map(p => p.id === pauseId ? { ...p, status: 'paused' } : p), { id: pid, title: item.text, why: '', progress: '', status: 'active' }],
+      inbox: s.inbox.filter(i => i.id !== item.id), promoteId: null, screen: 'quarter',
+      editingId: pid, editHint: 'Pick a category and write down why it matters while it is fresh.', editDraft: { title: item.text, category: '', why: '', progress: '', projectIds: [] },
+    }));
+    this.scrollTop();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const today = this.today();
+    const bare = (this.props.frame ?? 'Phone') === 'Fill the window';
+    const topTabs = (this.props.navStyle ?? 'Bottom tabs') === 'Top tabs';
+
+    const base = rhythm(s.birthday, today);
+    const closed = s.closedKeys.includes(base.key);
+    const q = closed ? quarterAfter(base) : base;
+    const qNum = q.qi + 1;
+    const total = daysBetween(q.start, q.end) + 1;
+    const dayN = daysBetween(q.start, today) + 1;
+    const upcoming = today < q.start;
+    const left = total - dayN;
+    const quarterRange = `${fmtMD(q.start)} – ${fmtMD(q.end)}`;
+    const quarterDayLine = upcoming ? `${fmtMDY(q.end)} · begins in ${daysBetween(today, q.start)} days` : left === 0 ? `${q.end.getFullYear()} · day ${dayN} of ${total}, the last` : `${q.end.getFullYear()} · day ${dayN} of ${total} · ${left} days left`;
+    const quarterPct = `${upcoming ? 0 : Math.round(dayN / total * 100)}%`;
+    const quote = QUOTES[daysBetween(new Date(today.getFullYear(), 0, 1), today) % QUOTES.length];
+
+    const monday = this.mondayOf(today);
+    const weekKey = iso(monday);
+    const saved = s.reviews.find(r => r.date === weekKey);
+    const reviewOpen = !saved;
+    const isMonday = today.getDay() === 1;
+    const daysSince = daysBetween(monday, today);
+
+    const active = s.priorities.filter(p => p.status === 'active');
+    const paused = s.priorities.filter(p => p.status === 'paused');
+    const projName = id => (s.projects.find(j => j.id === id) || {}).name || '';
+    const lastFor = ids => { const list = s.activity.filter(a => ids.includes(a.projectId)); return list.length ? list[list.length - 1] : null; };
+    const lastInfo = ids => { const a = lastFor(ids); return a ? { last: `${a.day.toUpperCase()} · ${a.text}`, lastColor: '#a8a8a8' } : { last: 'Quiet last week', lastColor: '#6a6a6a' }; };
+
+    const screens = [
+      { id: 'quarter', label: 'Quarter', short: 'Quarter' },
+      { id: 'review', label: 'Monday review', short: 'Review' },
+      { id: 'history', label: 'Past reviews', short: 'Past' },
+      { id: 'inbox', label: 'Backburner', short: 'Burner' },
+    ];
+    const navItems = screens.map(n => {
+      const on = n.id === s.screen;
+      return { ...n, go: () => this.go(n.id), color: on ? '#f5f5f5' : '#8a8a8a', weight: on ? 600 : 500, underline: on ? '#f5f5f5' : 'transparent', dot: n.id === 'review' && reviewOpen && !on };
+    });
+
+    const d = s.editDraft || { title: '', category: '', why: '', progress: '', projectIds: [] };
+    const editCategories = CATEGORIES.map(c => { const on = d.category === c; return { label: c, bg: on ? '#f5f5f5' : 'transparent', border: on ? '#f5f5f5' : '#333', color: on ? '#000' : '#d0d0d0', pick: () => this.setState(st => ({ editDraft: { ...st.editDraft, category: c } })) }; });
+    const priorityCards = active.map((p, i) => {
+      const mine = s.projects.filter(j => j.priorityId === p.id);
+      const expanded = !!s.expanded[p.id];
+      const addingProject = s.addingFor === p.id;
+      return {
+        id: p.id, n: ROMAN[i] || String(i + 1), title: p.title, why: p.why || 'Not written yet.', progress: p.progress || 'Not written yet.',
+        category: p.category || '', hasCategory: !!p.category,
+        hasAdjust: !!p.adjust, adjust: p.adjust || '',
+        ...lastInfo(mine.map(j => j.id)),
+        projects: mine.map(j => ({ name: j.name, ...lastInfo([j.id]) })),
+        noProjects: mine.length === 0,
+        expanded, chevron: expanded ? 'rotate(-135deg)' : 'rotate(45deg)',
+        toggle: () => this.setState(st => ({ expanded: { ...st.expanded, [p.id]: !st.expanded[p.id] } })),
+        addingProject, addProjectLabel: addingProject ? 'Cancel' : '+ Project',
+        toggleAddProject: () => this.setState(st => ({ addingFor: st.addingFor === p.id ? null : p.id, newProject: '' })),
+        editing: s.editingId === p.id, viewing: s.editingId !== p.id, edit: () => this.startEdit(p),
+      };
+    });
+    if (s.editingId === 'new') priorityCards.push({ id: 'new', n: '', title: '', why: '', progress: '', category: '', hasCategory: false, hasAdjust: false, adjust: '', last: '', lastColor: '', projects: [], noProjects: false, expanded: false, chevron: '', toggle: () => {}, addingProject: false, addProjectLabel: '', toggleAddProject: () => {}, editing: true, viewing: false, edit: () => {} });
+    const editProjects = s.projects.map(j => {
+      const on = d.projectIds.includes(j.id);
+      return { name: j.name, bg: on ? '#f5f5f5' : 'transparent', border: on ? '#f5f5f5' : '#333', color: on ? '#000' : '#d0d0d0',
+        toggle: () => this.setState(st => { const ids = st.editDraft.projectIds; return { editDraft: { ...st.editDraft, projectIds: on ? ids.filter(x => x !== j.id) : [...ids, j.id] } }; }) };
+    });
+    const unlinked = s.projects.filter(j => !j.priorityId).map(j => ({ name: j.name, ...lastInfo([j.id]), link: e => { const v = e.target.value; if (v) this.setState(st => ({ projects: st.projects.map(x => x.id === j.id ? { ...x, priorityId: v } : x) })); } }));
+    const pausedRows = paused.map(p => ({ title: p.title, resumeLabel: active.length < 3 ? 'Bring back' : 'No room yet', resumeColor: active.length < 3 ? '#f5f5f5' : '#6a6a6a', resume: () => { if (active.length < 3) this.setStatus(p.id, 'active'); } }));
+
+    const openCookies = s.cookies.filter(c => !c.done).length;
+    const cookieRows = s.cookies.map(c => ({ text: c.text, boxBg: c.done ? '#f5f5f5' : 'transparent', deco: c.done ? 'line-through' : 'none', color: c.done ? '#6a6a6a' : '#f5f5f5',
+      toggle: () => this.setState(st => ({ cookies: st.cookies.map(x => x.id === c.id ? { ...x, done: !x.done } : x) })) }));
+
+    const qrWindowOpen = !upcoming && daysBetween(today, q.end) <= 14;
+    const showQrCard = !closed && qrWindowOpen;
+    const showQrFooter = !closed && !upcoming && !qrWindowOpen;
+    const qrCardTitle = left === 0 ? `Quarter ${qNum} closes today` : `Quarter ${qNum} closes ${fmtWk(q.end)}`;
+    const qrFooterText = `The quarter review opens ${fmtMD(addDays(q.end, -14))}, two weeks before the quarter ends.`;
+
+    const reviewNudgeTitle = isMonday ? 'It is Monday. Your weekly review is ready.' : "This week's review is still open.";
+    const reviewNudgeBody = isMonday ? 'Ten minutes: what moved, what got in the way, one step for the week.' : 'Monday has passed; that is fine. Ten quiet minutes whenever suits.';
+    const reviewTitle = `Week of ${fmtMD(monday)}`;
+    const reviewIntro = saved ? 'This week is saved. The next review opens on Monday; until then there is nothing to do here.' : isMonday ? 'Good morning. Ten minutes to look back, and one step for the week ahead.' : `Monday was ${daysSince === 1 ? 'yesterday' : daysSince + ' days ago'}; that is fine. The review waits, and nothing piles up.`;
+    const activityRows = s.activity.map(a => ({ day: a.day, text: a.text, project: projName(a.projectId) }));
+    const stillRows = active.map(p => {
+      const v = s.draft.still[p.id];
+      const y = v === 'yes' ? SEL : UNSEL, n = v === 'no' ? SEL : UNSEL;
+      return { title: p.title, yes: () => this.setStill(p.id, 'yes'), no: () => this.setStill(p.id, 'no'), yesBg: y.bg, yesColor: y.color, noBg: n.bg, noColor: n.color };
+    });
+    const reminderLine = s.reminderOn ? `A reminder arrives at ${time12(s.reminderTime)}.` : 'Reminders are off; it will be here regardless.';
+
+    const groups = new Map();
+    const groupFor = date => {
+      const r = rhythm(s.birthday, parseISO(date));
+      if (!groups.has(r.key)) groups.set(r.key, { key: r.key, title: `Year ${r.yearNumber} · Quarter ${r.qi + 1}`, range: `${fmtShort(r.start)} – ${fmtShort(r.end)} ${r.end.getFullYear()}`, sort: r.start.getTime(), reviews: [], decisions: [], hasDecisions: false, closedLabel: '', count: '' });
+      return groups.get(r.key);
+    };
+    [...s.reviews].sort((a, b) => b.date.localeCompare(a.date)).forEach(r => {
+      groupFor(r.date).reviews.push({ dateLabel: fmt(parseISO(r.date), { weekday: 'long', month: 'long', day: 'numeric' }), moved: r.moved, way: r.way, next: r.next, stillLabel: r.still ? `${r.still} to reconsider` : 'Still mattered' });
+    });
+    s.quarterReviews.forEach(qr => {
+      const g = groupFor(qr.date);
+      g.hasDecisions = true; g.closedLabel = fmtMD(parseISO(qr.date));
+      g.decisions = qr.decisions.map(x => ({ title: x.title, note: x.note, ...DECISION[x.decision] }));
+    });
+    const historyGroups = [...groups.values()].sort((a, b) => b.sort - a.sort).map(g => ({ ...g, count: `${g.reviews.length} ${g.reviews.length === 1 ? 'review' : 'reviews'}` }));
+
+    const inboxRows = s.inbox.map(i => ({
+      text: i.text, dateLabel: fmtShort(parseISO(i.date)),
+      flagLabel: i.flagged ? 'Marked for quarter review' : 'Mark for quarter review',
+      flagBg: i.flagged ? '#f5f5f5' : 'transparent', flagBorder: i.flagged ? '#f5f5f5' : '#333', flagColor: i.flagged ? '#000' : '#f5f5f5',
+      toggleFlag: () => this.setState(st => ({ inbox: st.inbox.map(x => x.id === i.id ? { ...x, flagged: !x.flagged } : x) })),
+      promote: () => this.setState({ promoteId: i.id }),
+      remove: () => this.setState(st => ({ inbox: st.inbox.filter(x => x.id !== i.id) })),
+    }));
+    const promoteItem = s.inbox.find(i => i.id === s.promoteId);
+    const promoteHasRoom = active.length < 3;
+
+    const qrRows = active.map(p => {
+      const qd = { outcome: '', decision: 'continue', change: '', ...(s.qrDraft[p.id] || {}) };
+      return { title: p.title, progress: p.progress || 'not written down', outcome: qd.outcome, change: qd.change,
+        setOutcome: e => this.setQr(p.id, { outcome: e.target.value }), setChange: e => this.setQr(p.id, { change: e.target.value }),
+        isAdjust: qd.decision === 'adjust', isRetire: qd.decision === 'retire',
+        options: ['continue', 'adjust', 'retire'].map(k => { const sel = qd.decision === k ? SEL : UNSEL; return { label: k[0].toUpperCase() + k.slice(1), pick: () => this.setQr(p.id, { decision: k }), bg: sel.bg, color: sel.color }; }) };
+    });
+    const counts = active.reduce((acc, p) => { acc[(s.qrDraft[p.id] || {}).decision || 'continue']++; return acc; }, { continue: 0, adjust: 0, retire: 0 });
+    const nextQ = quarterAfter(q);
+    const qrFlagged = s.inbox.filter(i => i.flagged).map(i => ({ text: i.text }));
+
+    let birthdayPreview = 'Enter a date to see your current year and quarter.';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s.birthdayDraft)) {
+      const r = rhythm(s.birthdayDraft, today);
+      birthdayPreview = r.yearNumber > 0 ? `Today falls in Year ${r.yearNumber} · Quarter ${r.qi + 1} · ${fmtMD(r.start)} – ${fmtMDY(r.end)}` : 'That date has not happened yet.';
+    }
+
+    return {
+      bare, topTabs, bottomTabs: !topTabs,
+      scrollPad: bare ? '20px 16px 40px' : '62px 16px 48px',
+      headPad: bare ? '8px 12px 0' : '56px 12px 0',
+      barPad: bare ? '6px 8px 14px' : '6px 8px 30px',
+      toastTop: bare ? '10px' : '58px',
+      navItems,
+      yearNumber: q.yearNumber, quarterNumber: qNum,
+      birthdayLabel: fmtMDY(parseISO(s.birthday)),
+      onQuarter: s.screen === 'quarter', onReview: s.screen === 'review', onHistory: s.screen === 'history', onInbox: s.screen === 'inbox',
+      goReview: () => this.go('review'), goHistory: () => this.go('history'),
+      quarterRange, quarterDayLine, quarterPct, quoteText: quote.text, quoteBy: quote.by, todayLabel: fmt(today, { weekday: 'long', month: 'long', day: 'numeric' }),
+      weekLine: (() => { const totalW = Math.ceil(total / 7), wk = upcoming ? 0 : Math.min(totalW, Math.floor((dayN - 1) / 7) + 1), leftW = totalW - wk; return upcoming ? `Quarter begins in ${Math.ceil(daysBetween(today, q.start) / 7)} weeks` : `Week ${wk} of ${totalW} · ${leftW === 0 ? 'final week' : leftW + (leftW === 1 ? ' week' : ' weeks') + ' left'}`; })(),
+      justClosedVisible: !!s.justClosed, justClosedTitle: s.justClosed ? s.justClosed.title : '', justClosedBody: s.justClosed ? s.justClosed.body : '', dismissClosed: () => this.setState({ justClosed: null }),
+      reviewOpen, reviewDone: !!saved, reviewNudgeTitle, reviewNudgeBody,
+      showQrCard, showQrFooter, qrCardTitle, qrFooterText, openQR: () => this.setState({ showQR: true }), closeQR: () => this.setState({ showQR: false }),
+      priorityCountLabel: `${active.length} of 3`, priorityCards,
+      newProject: s.newProject, setNewProject: e => this.setState({ newProject: e.target.value }), saveProject: e => this.saveProject(e),
+      editTitle: d.title, editWhy: d.why, editProgress: d.progress, editProjects, editCategories, editHint: s.editHint,
+      setEditTitle: e => this.setState(st => ({ editDraft: { ...st.editDraft, title: e.target.value }, editHint: '' })),
+      setEditWhy: e => this.setState(st => ({ editDraft: { ...st.editDraft, why: e.target.value } })),
+      setEditProgress: e => this.setState(st => ({ editDraft: { ...st.editDraft, progress: e.target.value } })),
+      editCanPause: !!s.editingId && s.editingId !== 'new', pauseEditing: () => { this.setStatus(s.editingId, 'paused'); this.setState({ editingId: null, editDraft: null, editHint: '' }); },
+      cancelEdit: () => this.setState({ editingId: null, editDraft: null, editHint: '' }), saveEdit: () => this.saveEdit(),
+      canAdd: active.length < 3 && s.editingId !== 'new', addLabel: active.length === 0 ? '+ First priority for this quarter' : `+ Priority · room for ${3 - active.length} more`,
+      startAdd: () => this.setState({ editingId: 'new', editHint: '', editDraft: { title: '', category: '', why: '', progress: '', projectIds: [] } }),
+      cookieRows, cookieCount: `${openCookies} open`, hasDoneCookies: s.cookies.some(c => c.done),
+      cookieText: s.cookieText, setCookieText: e => this.setState({ cookieText: e.target.value }),
+      addCookie: e => { e.preventDefault(); const t = s.cookieText.trim(); if (!t) return; this.setState(st => ({ cookies: [...st.cookies, { id: nid('c'), text: t, done: false }], cookieText: '' })); },
+      clearDone: () => this.setState(st => ({ cookies: st.cookies.filter(c => !c.done) })),
+      hasPaused: paused.length > 0, pausedRows,
+      hasUnlinked: unlinked.length > 0, unlinked, priorityOptions: active.map(p => ({ id: p.id, title: p.title })),
+      reviewTitle, reviewIntro, nextMondayLabel: fmtMD(addDays(monday, 7)), reminderLine,
+      savedMoved: saved ? saved.moved : '', savedWay: saved ? saved.way : '', savedNext: saved ? saved.next : '',
+      activeTitles: active.map(p => ({ title: p.title })), lastWeekRange: `${fmtShort(addDays(monday, -7))} – ${fmtShort(addDays(monday, -1))}`, activityRows,
+      draftMoved: s.draft.moved, draftWay: s.draft.way, draftNext: s.draft.next,
+      setMoved: e => this.setDraft('moved', e.target.value), setWay: e => this.setDraft('way', e.target.value), setNext: e => this.setDraft('next', e.target.value),
+      stillRows, anyReconsider: Object.values(s.draft.still).includes('no'), saveHint: s.saveHint, saveReview: () => this.saveReview(weekKey),
+      reminderStatus: s.reminderOn ? `A notification on Mondays at ${time12(s.reminderTime)}. If you miss it, the review simply waits.` : 'Off. The review will still be here on Mondays.',
+      reminderTime: s.reminderTime, setReminderTime: e => this.setState({ reminderTime: e.target.value }),
+      toggleReminder: () => this.setState(st => ({ reminderOn: !st.reminderOn })),
+      reminderTrackBg: s.reminderOn ? '#f5f5f5' : '#000', reminderKnobBg: s.reminderOn ? '#000' : '#f5f5f5', reminderKnob: s.reminderOn ? 'translateX(20px)' : 'translateX(0)',
+      previewReminder: () => this.showToast(this.reminderToast()),
+      historyGroups,
+      inboxText: s.inboxText, setInboxText: e => this.setState({ inboxText: e.target.value }),
+      addInbox: e => { e.preventDefault(); const t = s.inboxText.trim(); if (!t) return; this.setState(st => ({ inbox: [{ id: nid('i'), date: iso(today), text: t, flagged: false }, ...st.inbox], inboxText: '' })); },
+      inboxRows, inboxEmpty: s.inbox.length === 0, burnerCount: `${s.inbox.length} ${s.inbox.length === 1 ? 'idea' : 'ideas'}`,
+      promoting: !!promoteItem, promoteText: promoteItem ? promoteItem.text : '', promoteHasRoom, promoteNoRoom: !promoteHasRoom,
+      promoteAddLabel: `Add as priority ${ROMAN[active.length] || active.length + 1}`, promoteAdd: () => this.promote(promoteItem, null),
+      promoteChoices: active.map(p => ({ title: p.title, swap: () => this.promote(promoteItem, p.id) })),
+      closePromote: () => this.setState({ promoteId: null }), stop: e => e.stopPropagation(),
+      showBirthday: s.showBirthday, openBirthday: () => this.setState({ showBirthday: true, birthdayDraft: s.birthday }), closeBirthday: () => this.setState({ showBirthday: false }),
+      birthdayDraft: s.birthdayDraft, setBirthdayDraft: e => this.setState({ birthdayDraft: e.target.value }), birthdayPreview,
+      saveBirthday: () => { if (/^\d{4}-\d{2}-\d{2}$/.test(s.birthdayDraft) && parseISO(s.birthdayDraft) < today) this.setState({ birthday: s.birthdayDraft, showBirthday: false, closedKeys: [] }); },
+      showQR: s.showQR, qrTitle: `Looking back on quarter ${qNum}`, qrIntro: `${quarterRange}. For each priority: what happened, and whether to continue, adjust, or retire it. Nothing here is a verdict on you.`,
+      qrRows, qrHasFlagged: qrFlagged.length > 0, qrFlagged, qrSummary: `${counts.continue} continue · ${counts.adjust} adjust · ${counts.retire} retire`,
+      qrCloseLabel: `Close Q${qNum} · begin Q${nextQ.qi + 1}`, closeQuarter: () => this.closeQuarter(q, today, active),
+      toastVisible: !!s.toast, toastTitle: s.toast ? s.toast.title : '', toastBody: s.toast ? s.toast.body : '', toastTap: () => this.setState({ toast: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>
