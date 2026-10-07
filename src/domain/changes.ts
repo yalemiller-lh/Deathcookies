@@ -20,7 +20,10 @@ export type DeleteChange = { op: 'delete'; collection: CollectionName; id: strin
 export type SettingsChange = { op: 'settings'; patch: Partial<Settings> };
 export type Change = PutChange | DeleteChange | SettingsChange;
 
-export const put = <C extends CollectionName>(collection: C, value: Collections[C]) => ({ op: 'put', collection, value }) as PutChange;
+/** Result of a command that can be refused by a rule. */
+export type Outcome<E extends string, X extends object = object> = ({ ok: true; changes: Change[] } & X) | { ok: false; error: E };
+
+export const put =<C extends CollectionName>(collection: C, value: Collections[C]) => ({ op: 'put', collection, value }) as PutChange;
 export const remove = (collection: CollectionName, id: string): DeleteChange => ({ op: 'delete', collection, id });
 export const patchSettings = (patch: Partial<Settings>): SettingsChange => ({ op: 'settings', patch });
 
