@@ -2,6 +2,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Backend } from './app/backend';
+import { firebaseConfig, vapidPublicKey } from './app/firebaseConfig';
 import { localBackend } from './app/localBackend';
 import { browserPush } from './services/push';
 import { App } from './ui/App';
@@ -9,6 +10,11 @@ import './ui/styles.css';
 
 async function chooseBackend(): Promise<Backend> {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (firebaseConfig) {
+    // Loaded on demand so on-device mode never downloads Firebase.
+    const { firebaseBackend } = await import('./app/firebaseBackend');
+    return firebaseBackend(firebaseConfig, vapidPublicKey, timeZone);
+  }
   return localBackend(localStorage, timeZone);
 }
 

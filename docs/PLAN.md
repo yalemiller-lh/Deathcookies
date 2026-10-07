@@ -21,6 +21,7 @@ laptop browser, backed by Firebase.
 | Database | Cloud Firestore | Hosted; syncs phone ⇄ laptop live; keeps working offline and catches up |
 | Hosting | Firebase Hosting | Serves the app and Google sign-in from one domain (needed for sign-in inside an iPhone home-screen app) |
 | Notifications | Standard Web Push (VAPID), sent by a scheduled Cloud Function every 15 min | Works on iPhone (home-screen app, iOS 16.4+), Android, and desktop Chrome/Edge |
+| Test send | Callable Cloud Function `sendTestReminder` | Settings can check the whole push path end to end |
 
 Cloud Functions need Firebase's pay-as-you-go (Blaze) plan. One person's use
 sits inside the free allowance; a budget alert guards against surprises.
@@ -103,4 +104,4 @@ screen, backburner "flag for review".
 8. Notifications: push subscription in the app, scheduled sender function.
 9. Deploy; install on phone; check laptop.
 
-Phases 1–6 need no accounts. Phases 7–9 need the Firebase project.
+Phases 1–6 need no accounts. Phases 7–9 need the Firebase project; see docs/SETUP.md.

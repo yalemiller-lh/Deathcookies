@@ -3,12 +3,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { Change } from '../domain/changes';
 import { startOfDay } from '../domain/dates';
 import type { CommandContext, PlannerState } from '../domain/model';
-import type { PlannerRepository } from '../data/repository';
+import type { DeviceRegistry, PlannerRepository } from '../data/repository';
 import type { AuthService, Session } from '../services/auth';
 import type { PushService } from '../services/push';
 
 export interface PlannerServices {
   repository: PlannerRepository;
+  devices: DeviceRegistry;
   push: PushService;
   auth: AuthService;
   session: Session;

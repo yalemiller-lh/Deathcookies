@@ -28,4 +28,5 @@ export function localRepository(storage: Storage, timeZone: string): PlannerRepo
 export const localDevices: DeviceRegistry = {
   async savePushSubscription() {},
   async removePushSubscription() {},
+  async sendTestReminder() { return null; },
 };

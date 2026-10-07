@@ -4,7 +4,7 @@ import { reminderMessage } from '../../domain/reminder';
 import { setReminder } from '../../domain/settings';
 import type { PushStatus } from '../../services/push';
 import { Sheet } from '../components/Sheet';
-import { monthDayYear, time12 } from '../format';
+import { monthDayYear, plural, time12 } from '../format';
 import { usePlanner } from '../PlannerContext';
 
 const DEVICE_COPY: Record<PushStatus, string> = {
@@ -17,16 +17,34 @@ const DEVICE_COPY: Record<PushStatus, string> = {
 
 export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => void; onChangeBirthday: () => void }) {
   const { state, run, services } = usePlanner();
-  const { push, auth, session } = services;
+  const { push, auth, session, devices } = services;
   const { settings } = state;
   const [deviceStatus, setDeviceStatus] = useState<PushStatus>(() => push.status());
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const deviceCopy = auth.kind === 'device' && deviceStatus === 'unsupported' ? 'Notifications start once the online database is connected.' : DEVICE_COPY[deviceStatus];
 
-  const allowOnDevice = async () => setDeviceStatus(await push.enable());
+  const allowOnDevice = async () => {
+    try {
+      setDeviceStatus(await push.enable());
+    } catch (e) {
+      setTestResult(`Could not turn on notifications: ${(e as Error).message}`);
+    }
+  };
   const toggleReminder = () => {
     const on = !settings.notificationsOn;
     const out = setReminder({ notificationsOn: on });
     if (out.ok) run(out.changes);
     if (on && deviceStatus === 'default') void allowOnDevice();
+  };
+  const sendTest = async () => {
+    setTestResult('Sending…');
+    try {
+      const report = await devices.sendTestReminder();
+      if (!report) { await push.showNow(reminderMessage(state.cookies)); setTestResult(null); return; }
+      setTestResult(report.sent > 0 ? `Sent to ${plural(report.sent, 'device', 'devices')}.` : 'Nothing was delivered. Allow notifications on this device first.');
+    } catch (e) {
+      setTestResult(`Could not send: ${(e as Error).message}`);
+    }
   };
   const setTime = (time: string) => {
     const out = setReminder({ notificationTime: time });
@@ -65,11 +83,12 @@ export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => vo
 
           <div className="setting">
             <span className="label">This device</span>
-            <p className="muted muted--small">{DEVICE_COPY[deviceStatus]}</p>
+            <p className="muted muted--small">{deviceCopy}</p>
             {deviceStatus === 'default' && <button className="btn-outline full" onClick={allowOnDevice}>Allow notifications on this device</button>}
             {deviceStatus === 'granted' && (
-              <div><button className="text-btn text-btn--start text-btn--strong" onClick={() => void push.showNow(reminderMessage(state.cookies))}>Show one now</button></div>
+              <div><button className="text-btn text-btn--start text-btn--strong" onClick={() => void sendTest()}>Send a test notification</button></div>
             )}
+            {testResult && <p className="hint" role="status">{testResult}</p>}
           </div>
 
           <div className="setting">

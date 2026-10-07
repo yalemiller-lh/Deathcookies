@@ -27,6 +27,14 @@ export default tseslint.config(
     },
   },
   {
+    files: ['functions/src/**/*.ts', 'tools/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['tools/**/*.mjs'],
+    extends: [js.configs.recommended],
+  },
+  {
     files: ['public/**/*.js'],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.serviceworker },

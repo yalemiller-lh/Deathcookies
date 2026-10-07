@@ -31,11 +31,12 @@ export function App({ backend, makePush, clock = systemClock, newId = randomId, 
 function SignedIn({ backend, makePush, clock, newId, deviceTimeZone, session }: Required<AppProps> & { session: Session }) {
   const services = useMemo<PlannerServices>(() => {
     const { repository, devices } = backend.open(session);
-    return { repository, push: makePush(backend.vapidPublicKey, devices), auth: backend.auth, session, clock, newId };
+    return { repository, devices, push: makePush(backend.vapidPublicKey, devices), auth: backend.auth, session, clock, newId };
   }, [backend, makePush, session, clock, newId]);
   return (
     <PlannerProvider services={services} loading={<Loading />}>
       <TimeZoneSync zone={deviceTimeZone} />
+      <PushRefresh />
       <Screens />
     </PlannerProvider>
   );
@@ -50,6 +51,19 @@ function TimeZoneSync({ zone }: { zone: string }) {
     const out = setReminder({ timeZone: zone });
     if (out.ok) run(out.changes);
   }, [saved, zone, run]);
+  return null;
+}
+
+/**
+ * Where this device already allows notifications, re-register its subscription
+ * at start-up: it may be new to this account, or the browser may have renewed it.
+ */
+function PushRefresh() {
+  const { services } = usePlanner();
+  const { push } = services;
+  useEffect(() => {
+    if (push.status() === 'granted') push.enable().catch(() => {});
+  }, [push]);
   return null;
 }
 

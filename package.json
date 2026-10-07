@@ -11,9 +11,13 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "check": "tsc --noEmit && eslint . && vitest run"
+    "typecheck:functions": "tsc --noEmit -p functions",
+    "build:functions": "node tools/build-functions.mjs",
+    "check": "tsc --noEmit && tsc --noEmit -p functions && eslint . && vitest run",
+    "deploy": "npm run check && npm run build && npm run build:functions && firebase deploy"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
@@ -25,8 +29,10 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "firebase-tools": "^15.32.1",
     "globals": "^17.13.0",
     "jsdom": "^30.1.2",
     "typescript": "~6.0.3",

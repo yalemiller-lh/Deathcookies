@@ -5,3 +5,7 @@ functions/node_modules/
 .firebase/
 *.log
 .env.local
+
+# Secrets: never commit
+*.local
+.secret.local
