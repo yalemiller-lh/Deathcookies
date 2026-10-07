@@ -15,6 +15,8 @@ export interface Settings {
   /** 'HH:MM', 24-hour. */
   notificationTime: string;
   closedQuarterKeys: string[];
+  /** Local date the last daily reminder went out. Written by the reminder sender, never by the app. */
+  lastReminderDate: ISODate | null;
 }
 
 export interface Cookie {
@@ -91,7 +93,7 @@ export interface PlannerState {
 export const DEFAULT_NOTIFICATION_TIME = '08:30';
 
 export function defaultSettings(timeZone: string): Settings {
-  return { birthday: null, timeZone, notificationsOn: false, notificationTime: DEFAULT_NOTIFICATION_TIME, closedQuarterKeys: [] };
+  return { birthday: null, timeZone, notificationsOn: false, notificationTime: DEFAULT_NOTIFICATION_TIME, closedQuarterKeys: [], lastReminderDate: null };
 }
 
 export function emptyState(timeZone = 'UTC'): PlannerState {

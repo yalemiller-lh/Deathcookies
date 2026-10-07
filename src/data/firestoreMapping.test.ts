@@ -26,9 +26,9 @@ describe('reading documents', () => {
 
   it('defaults settings for a brand-new user', () => {
     expect(settingsFromDoc(undefined, 'Europe/London')).toEqual({
-      birthday: null, timeZone: 'Europe/London', notificationsOn: false, notificationTime: '08:30', closedQuarterKeys: [],
+      birthday: null, timeZone: 'Europe/London', notificationsOn: false, notificationTime: '08:30', closedQuarterKeys: [], lastReminderDate: null,
     });
-    expect(settingsFromDoc({ birthday: '2002-05-01', lastReminderDate: '2026-10-07' }, 'UTC').birthday).toBe('2002-05-01');
+    expect(settingsFromDoc({ birthday: '2002-05-01', lastReminderDate: '2026-10-07' }, 'UTC')).toMatchObject({ birthday: '2002-05-01', lastReminderDate: '2026-10-07' });
   });
 });
 

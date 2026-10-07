@@ -4,7 +4,7 @@ import { reminderMessage } from '../../domain/reminder';
 import { setReminder } from '../../domain/settings';
 import type { PushStatus } from '../../services/push';
 import { Sheet } from '../components/Sheet';
-import { monthDayYear, plural, time12 } from '../format';
+import { monthDayYear, time12, weekdayMonthDay } from '../format';
 import { usePlanner } from '../PlannerContext';
 
 const DEVICE_COPY: Record<PushStatus, string> = {
@@ -17,7 +17,7 @@ const DEVICE_COPY: Record<PushStatus, string> = {
 
 export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => void; onChangeBirthday: () => void }) {
   const { state, run, services } = usePlanner();
-  const { push, auth, session, devices } = services;
+  const { push, auth, session } = services;
   const { settings } = state;
   const [deviceStatus, setDeviceStatus] = useState<PushStatus>(() => push.status());
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -36,14 +36,12 @@ export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => vo
     if (out.ok) run(out.changes);
     if (on && deviceStatus === 'default') void allowOnDevice();
   };
-  const sendTest = async () => {
-    setTestResult('Sending…');
+  const showNow = async () => {
     try {
-      const report = await devices.sendTestReminder();
-      if (!report) { await push.showNow(reminderMessage(state.cookies)); setTestResult(null); return; }
-      setTestResult(report.sent > 0 ? `Sent to ${plural(report.sent, 'device', 'devices')}.` : 'Nothing was delivered. Allow notifications on this device first.');
+      await push.showNow(reminderMessage(state.cookies));
+      setTestResult(null);
     } catch (e) {
-      setTestResult(`Could not send: ${(e as Error).message}`);
+      setTestResult(`Could not show it: ${(e as Error).message}`);
     }
   };
   const setTime = (time: string) => {
@@ -77,8 +75,11 @@ export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => vo
               <input id="reminder-time" type="time" className="input time-input" value={settings.notificationTime} onChange={e => setTime(e.target.value)} />
             </div>
             <p className="muted muted--small">
-              {settings.notificationsOn ? `Every day at ${time12(settings.notificationTime)}, on each device you allow below.` : 'Off. Nothing will be sent.'}
+              {settings.notificationsOn ? `Every day at ${time12(settings.notificationTime)}, on each device you allow below. It can arrive a few minutes late.` : 'Off. Nothing will be sent.'}
             </p>
+            {auth.kind === 'google' && settings.notificationsOn && (
+              <p className="hint">Last sent: {settings.lastReminderDate ? weekdayMonthDay(parseISODate(settings.lastReminderDate)) : 'not yet'}</p>
+            )}
           </div>
 
           <div className="setting">
@@ -86,7 +87,7 @@ export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => vo
             <p className="muted muted--small">{deviceCopy}</p>
             {deviceStatus === 'default' && <button className="btn-outline full" onClick={allowOnDevice}>Allow notifications on this device</button>}
             {deviceStatus === 'granted' && (
-              <div><button className="text-btn text-btn--start text-btn--strong" onClick={() => void sendTest()}>Send a test notification</button></div>
+              <div><button className="text-btn text-btn--start text-btn--strong" onClick={() => void showNow()}>Show one now</button></div>
             )}
             {testResult && <p className="hint" role="status">{testResult}</p>}
           </div>

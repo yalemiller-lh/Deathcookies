@@ -1,0 +1,72 @@
+# Sends the daily Deathcookies reminder. Runs every 15 minutes (off the busy
+# top of the hour); the sender works out whose reminder time has come.
+# Needs repository secrets FIREBASE_SERVICE_ACCOUNT and VAPID_PRIVATE_KEY
+# (see docs/SETUP.md).
+name: Reminders
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+    # Weekly keep-alive: GitHub turns schedules off after 60 days without repository activity.
+    - cron: '41 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Send the current reminder now, whatever the time'
+        type: boolean
+        default: true
+
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    if: github.event.schedule != '41 4 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Until both secrets exist, skip quietly instead of failing (and emailing) every run.
+      - id: setup
+        run: |
+          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ] && [ -n "$VAPID_PRIVATE_KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Reminder secrets are not set yet, so nothing was sent."
+          fi
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      - if: steps.setup.outputs.ready == 'true'
+        uses: actions/checkout@v5
+      - if: steps.setup.outputs.ready == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sender/package-lock.json
+      - if: steps.setup.outputs.ready == 'true'
+        run: npm ci --no-audit --no-fund
+        working-directory: sender
+      - if: steps.setup.outputs.ready == 'true'
+        run: node build.mjs
+        working-directory: sender
+      - if: steps.setup.outputs.ready == 'true'
+        run: node lib/run.mjs ${{ inputs.test && '--test' || '' }}
+        working-directory: sender
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+
+  keepalive:
+    if: github.event.schedule == '41 4 * * 1'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - run: gh workflow enable reminders.yml --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -30,12 +30,13 @@ describe('reminderDueDate', () => {
     expect(localClock(at('2026-10-07T02:00:00Z'), 'America/New_York').date).toBe('2026-10-06');
   });
 
-  it('is due from the chosen time for an hour, once per day', () => {
+  it('is due from the chosen time for three hours, once per day', () => {
     expect(reminderDueDate(settings, at('2026-10-07T12:29:00Z'), null)).toBeNull();
     expect(reminderDueDate(settings, at('2026-10-07T12:30:00Z'), null)).toBe('2026-10-07');
     expect(reminderDueDate(settings, at('2026-10-07T13:15:00Z'), '2026-10-06')).toBe('2026-10-07');
     expect(reminderDueDate(settings, at('2026-10-07T13:15:00Z'), '2026-10-07')).toBeNull();
-    expect(reminderDueDate(settings, at('2026-10-07T13:30:00Z'), null)).toBeNull();
+    expect(reminderDueDate(settings, at('2026-10-07T15:29:00Z'), null)).toBe('2026-10-07');
+    expect(reminderDueDate(settings, at('2026-10-07T15:30:00Z'), null)).toBeNull();
   });
 
   it('is never due when switched off', () => {

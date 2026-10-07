@@ -1,6 +1,5 @@
 // Firestore adapters: the planner's data and this account's push subscriptions.
 import { collection, deleteDoc, doc, onSnapshot, setDoc, writeBatch, type Firestore } from 'firebase/firestore';
-import { httpsCallable, type Functions } from 'firebase/functions';
 import { COLLECTION_NAMES } from '../domain/changes';
 import { entityFromDoc, StateAssembler, writesFor } from './firestoreMapping';
 import type { DeviceRegistry, PlannerRepository } from './repository';
@@ -40,7 +39,7 @@ async function subscriptionId(endpoint: string): Promise<string> {
   return Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export function firestoreDevices(db: Firestore, uid: string, functions: Functions): DeviceRegistry {
+export function firestoreDevices(db: Firestore, uid: string): DeviceRegistry {
   return {
     async savePushSubscription(subscription) {
       if (!subscription.endpoint || !subscription.keys) throw new Error('The browser returned an incomplete push subscription.');
@@ -53,10 +52,6 @@ export function firestoreDevices(db: Firestore, uid: string, functions: Function
     },
     async removePushSubscription(endpoint) {
       await deleteDoc(doc(db, 'users', uid, 'pushSubscriptions', await subscriptionId(endpoint)));
-    },
-    async sendTestReminder() {
-      const result = await httpsCallable<void, { sent: number; failed: number; removed: number }>(functions, 'sendTestReminder')();
-      return result.data;
     },
   };
 }

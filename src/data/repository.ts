@@ -18,6 +18,4 @@ export interface PlannerRepository {
 export interface DeviceRegistry {
   savePushSubscription(subscription: PushSubscriptionJSON): Promise<void>;
   removePushSubscription(endpoint: string): Promise<void>;
-  /** Has the server push the current reminder to every registered device; null when there is no server. */
-  sendTestReminder(): Promise<{ sent: number; failed: number; removed: number } | null>;
 }

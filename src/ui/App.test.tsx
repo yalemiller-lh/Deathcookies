@@ -131,4 +131,16 @@ describe('settings', () => {
     expect(repo.snapshot().settings.notificationsOn).toBe(true);
     expect(screen.getByText(/Every day at 8:30 am/)).toBeInTheDocument();
   });
+
+  it('shows when the last reminder went out, for a signed-in account', async () => {
+    const base = emptyState('UTC');
+    const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01', notificationsOn: true, lastReminderDate: '2026-10-06' } });
+    const auth = { ...deviceAuth, kind: 'google' as const, onChange: (l: (s: { uid: string; email: string }) => void) => { l({ uid: 'u1', email: 'me@example.com' }); return () => {}; } };
+    const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+    render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC" />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+    expect(screen.getByText('Last sent: Tuesday, October 6')).toBeInTheDocument();
+    expect(screen.getByText('me@example.com')).toBeInTheDocument();
+  });
 });

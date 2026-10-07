@@ -20,11 +20,19 @@ laptop browser, backed by Firebase.
 | Sign-in | Firebase Auth, Google account | Same data on every device; no passwords to manage |
 | Database | Cloud Firestore | Hosted; syncs phone ⇄ laptop live; keeps working offline and catches up |
 | Hosting | Firebase Hosting | Serves the app and Google sign-in from one domain (needed for sign-in inside an iPhone home-screen app) |
-| Notifications | Standard Web Push (VAPID), sent by a scheduled Cloud Function every 15 min | Works on iPhone (home-screen app, iOS 16.4+), Android, and desktop Chrome/Edge |
-| Test send | Callable Cloud Function `sendTestReminder` | Settings can check the whole push path end to end |
+| Notifications | Standard Web Push (VAPID), sent by `sender/` from a GitHub Actions schedule every 15 min | Works on iPhone (home-screen app, iOS 16.4+), Android, and desktop Chrome/Edge |
 
-Cloud Functions need Firebase's pay-as-you-go (Blaze) plan. One person's use
-sits inside the free allowance; a budget alert guards against surprises.
+**Everything runs on free plans with no card on file** (decided 2026-10-07):
+Firebase's free Spark plan for sign-in, database and hosting, and GitHub
+Actions for the reminder (Firebase's scheduled functions need the paid plan).
+Trade-offs: GitHub may start scheduled runs late or skip one, so a reminder
+may go out up to 3 hours after its time (later than that it is skipped for
+the day); GitHub silently disables schedules after 60 days without repository
+activity, which a weekly keep-alive job guards against; and the repository
+must stay public for the every-15-minutes schedule to be free. Settings shows
+the date of the last reminder sent, so a stopped schedule is noticeable.
+The sender uses a service account limited to the database (Cloud Datastore
+User), not an admin key.
 
 ### Layers (one direction only: UI → state → domain; data adapters behind an interface)
 
@@ -42,8 +50,8 @@ src/
   services/    auth.ts, push.ts (browser push subscription)
   ui/          React components. Calls domain commands, hands the resulting
                Change[] to the repository. Never imports Firebase.
-functions/     Scheduled sender. Bundles src/domain/reminder.ts so the
-               notification wording is defined once.
+sender/        The reminder sender (Node), run by .github/workflows/reminders.yml.
+               Bundles src/domain/reminder.ts so the wording is defined once.
 public/        manifest, icons, service worker (offline shell + push display)
 ```
 
@@ -101,7 +109,7 @@ screen, backburner "flag for review".
 5. UI: home screen, sheets, settings, to the design spec.
 6. PWA: manifest, icon, service worker.
 7. Firebase: sign-in, Firestore adapter, security rules, hosting.
-8. Notifications: push subscription in the app, scheduled sender function.
+8. Notifications: push subscription in the app, scheduled sender on GitHub Actions.
 9. Deploy; install on phone; check laptop.
 
 Phases 1–6 need no accounts. Phases 7–9 need the Firebase project; see docs/SETUP.md.

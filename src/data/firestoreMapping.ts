@@ -10,8 +10,6 @@ const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0
 const strOrNull = (v: unknown) => (typeof v === 'string' && v ? v : null);
 
 /** The settings fields stored on users/{uid}. */
-export const SETTINGS_FIELDS = ['birthday', 'timeZone', 'notificationsOn', 'notificationTime', 'closedQuarterKeys'] as const satisfies readonly (keyof Settings)[];
-
 export function settingsFromDoc(data: Data | undefined, timeZone: string): Settings {
   const d = defaultSettings(timeZone);
   if (!data) return d;
@@ -21,6 +19,7 @@ export function settingsFromDoc(data: Data | undefined, timeZone: string): Setti
     notificationsOn: data.notificationsOn === true,
     notificationTime: str(data.notificationTime, d.notificationTime),
     closedQuarterKeys: Array.isArray(data.closedQuarterKeys) ? data.closedQuarterKeys.filter((k): k is string => typeof k === 'string') : [],
+    lastReminderDate: strOrNull(data.lastReminderDate),
   };
 }
 
