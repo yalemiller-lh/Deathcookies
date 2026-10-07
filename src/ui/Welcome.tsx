@@ -1,32 +1,61 @@
 // Screens before the home screen: signing in, and choosing the birthday.
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
+import type { AuthService } from '../services/auth';
 import { BirthdayForm } from './sheets/BirthdayForm';
 
 function BrandMark() {
   return <div className="brand-mark" aria-hidden="true"><span /></div>;
 }
 
-export function SignIn({ onSignIn }: { onSignIn: () => Promise<void> }) {
+export function SignIn({ auth }: { auth: AuthService }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const signIn = async () => {
+  const [usePassword, setUsePassword] = useState(!auth.googleAvailable);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const attempt = async (action: () => Promise<void>) => {
     setBusy(true);
     setError(null);
     try {
-      await onSignIn();
+      await action();
     } catch (e) {
       setError((e as Error).message || 'Sign-in did not finish.');
     } finally {
       setBusy(false);
     }
   };
+  const submitPassword = (e: FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password) { setError('Enter your email and password.'); return; }
+    void attempt(() => auth.signInWithPassword(email, password));
+  };
+
   return (
     <main className="centered">
       <div className="welcome">
         <BrandMark />
         <h1 className="welcome-title">Deathcookies</h1>
         <p className="muted">Urgent things first. Three priorities a quarter. A year that starts on your birthday.</p>
-        <button className="btn-primary full tall" onClick={signIn} disabled={busy}>Sign in with Google</button>
+        {!auth.googleAvailable && (
+          <p className="preview-box">Google sign-in cannot finish inside the Home Screen app. Use your Google email with the password you set on your computer (Settings → Account).</p>
+        )}
+        {usePassword ? (
+          <form className="stack-8" onSubmit={submitPassword}>
+            <input className="input" type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" aria-label="Email" />
+            <input className="input" type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" aria-label="Password" />
+            <button type="submit" className="btn-primary full tall" disabled={busy}>Sign in</button>
+          </form>
+        ) : (
+          <button className="btn-primary full tall" onClick={() => void attempt(() => auth.signIn())} disabled={busy}>Sign in with Google</button>
+        )}
+        {auth.googleAvailable && (
+          <div>
+            <button className="text-btn text-btn--start" onClick={() => { setUsePassword(p => !p); setError(null); }}>
+              {usePassword ? 'Use Google instead' : 'Use email and password instead'}
+            </button>
+          </div>
+        )}
         {error && <p className="hint" role="alert">{error}</p>}
       </div>
     </main>

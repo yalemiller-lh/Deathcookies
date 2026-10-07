@@ -6,7 +6,7 @@ import { parseISODate } from '../domain/dates';
 import { emptyState, type PlannerState } from '../domain/model';
 import { memoryRepository } from '../data/memoryRepository';
 import { localDevices } from '../data/localRepository';
-import { deviceAuth } from '../services/auth';
+import { deviceAuth, type AuthService, type Session } from '../services/auth';
 import type { PushService } from '../services/push';
 import { priority } from '../test/fixtures';
 import { App } from './App';
@@ -23,6 +23,82 @@ function setup(patch: Partial<PlannerState> = {}, date = '2026-10-07', birthday:
 }
 
 const section = (name: string) => screen.getByRole('region', { name });
+
+/** A signed-in-capable account; the password 'right' is the only one that works. */
+function fakeGoogleAuth({ googleAvailable = true, session = null }: { googleAvailable?: boolean; session?: Session | null }) {
+  const calls = { passwordSignIns: [] as string[][], passwordsSet: [] as string[] };
+  const auth: AuthService = {
+    kind: 'google',
+    googleAvailable,
+    onChange: listener => { listener(session); return () => {}; },
+    signIn: async () => {},
+    signInWithPassword: async (email, password) => {
+      calls.passwordSignIns.push([email, password]);
+      if (password !== 'right') throw new Error('That email and password do not match.');
+    },
+    setPassword: async password => { calls.passwordsSet.push(password); },
+    signOut: async () => {},
+  };
+  return { auth, calls };
+}
+
+function renderWithAuth(auth: AuthService) {
+  const base = emptyState('UTC');
+  const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01' } });
+  const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+  render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC" />);
+  return userEvent.setup();
+}
+
+describe('signing in', () => {
+  it('offers Google on a computer, with email and password as an alternative', async () => {
+    const { auth } = fakeGoogleAuth({});
+    const user = renderWithAuth(auth);
+    expect(screen.getByRole('button', { name: 'Sign in with Google' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Use email and password instead' }));
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+  });
+
+  it('goes straight to email and password in the Home Screen app, and explains why', async () => {
+    const { auth, calls } = fakeGoogleAuth({ googleAvailable: false });
+    const user = renderWithAuth(auth);
+    expect(screen.queryByRole('button', { name: 'Sign in with Google' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Google sign-in cannot finish inside the Home Screen app/)).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Email'), 'me@example.com');
+    await user.type(screen.getByLabelText('Password'), 'wrong');
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('That email and password do not match.');
+    expect(calls.passwordSignIns).toEqual([['me@example.com', 'wrong']]);
+  });
+});
+
+describe('setting a password', () => {
+  it('checks the two entries match, then adds the password to the account', async () => {
+    const { auth, calls } = fakeGoogleAuth({ session: { uid: 'u1', email: 'me@example.com', hasPassword: false } });
+    const user = renderWithAuth(auth);
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: 'Set a password' }));
+    await user.type(screen.getByLabelText('New password'), 'secret1');
+    await user.type(screen.getByLabelText('Same password again'), 'secret2');
+    await user.click(screen.getByRole('button', { name: 'Save password' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('The two passwords do not match.');
+    expect(calls.passwordsSet).toEqual([]);
+
+    await user.clear(screen.getByLabelText('Same password again'));
+    await user.type(screen.getByLabelText('Same password again'), 'secret1');
+    await user.click(screen.getByRole('button', { name: 'Save password' }));
+    expect(await screen.findByText('Password set. On the iPhone app, sign in with me@example.com and that password.')).toBeInTheDocument();
+    expect(calls.passwordsSet).toEqual(['secret1']);
+  });
+
+  it('just confirms when the account already has one', async () => {
+    const { auth } = fakeGoogleAuth({ session: { uid: 'u1', email: 'me@example.com', hasPassword: true } });
+    const user = renderWithAuth(auth);
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+    expect(screen.queryByRole('button', { name: 'Set a password' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Password set/)).toBeInTheDocument();
+  });
+});
 
 describe('onboarding', () => {
   it('asks for a birthday, previews the quarter, then shows the home screen', async () => {
@@ -135,7 +211,7 @@ describe('settings', () => {
   it('shows when the last reminder went out, for a signed-in account', async () => {
     const base = emptyState('UTC');
     const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01', notificationsOn: true, lastReminderDate: '2026-10-06' } });
-    const auth = { ...deviceAuth, kind: 'google' as const, onChange: (l: (s: { uid: string; email: string }) => void) => { l({ uid: 'u1', email: 'me@example.com' }); return () => {}; } };
+    const { auth } = fakeGoogleAuth({ session: { uid: 'u1', email: 'me@example.com', hasPassword: false } });
     const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
     render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC" />);
     const user = userEvent.setup();

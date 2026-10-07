@@ -4,6 +4,7 @@ import { reminderMessage } from '../../domain/reminder';
 import { setReminder } from '../../domain/settings';
 import type { PushStatus } from '../../services/push';
 import { Sheet } from '../components/Sheet';
+import { PasswordSetting } from './PasswordSetting';
 import { monthDayYear, time12, weekdayMonthDay } from '../format';
 import { usePlanner } from '../PlannerContext';
 
@@ -95,10 +96,13 @@ export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => vo
           <div className="setting">
             <span className="label">Account</span>
             {auth.kind === 'google' ? (
-              <div className="setting-row">
-                <span className="setting-value">{session.email ?? 'Signed in'}</span>
-                <button className="text-btn text-btn--end text-btn--strong" onClick={() => void auth.signOut()}>Sign out</button>
-              </div>
+              <>
+                <div className="setting-row">
+                  <span className="setting-value">{session.email ?? 'Signed in'}</span>
+                  <button className="text-btn text-btn--end text-btn--strong" onClick={() => void auth.signOut()}>Sign out</button>
+                </div>
+                {session.email && <PasswordSetting auth={auth} email={session.email} hasPassword={session.hasPassword} />}
+              </>
             ) : (
               <p className="muted muted--small">Saved on this device only. Connect the online database to use it on your phone and laptop together.</p>
             )}

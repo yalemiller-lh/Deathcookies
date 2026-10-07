@@ -24,7 +24,7 @@ export function App({ backend, makePush, clock = systemClock, newId = randomId, 
   useEffect(() => backend.auth.onChange(setSession), [backend]);
 
   if (session === undefined) return <Loading />;
-  if (session === null) return <SignIn onSignIn={() => backend.auth.signIn()} />;
+  if (session === null) return <SignIn auth={backend.auth} />;
   return <SignedIn key={session.uid} {...{ backend, makePush, clock, newId, deviceTimeZone, session }} />;
 }
 

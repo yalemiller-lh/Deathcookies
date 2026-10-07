@@ -1,6 +1,7 @@
 // Browser push notifications for this device.
 import type { DeviceRegistry } from '../data/repository';
 import type { ReminderMessage } from '../domain/reminder';
+import { isAppleMobile, isStandalone } from './platform';
 
 /**
  * unsupported   — this browser cannot receive push (or no server is configured)
@@ -15,14 +16,6 @@ export interface PushService {
   enable(): Promise<PushStatus>;
   /** Shows a reminder on this device straight away, to check it displays. */
   showNow(message: ReminderMessage): Promise<void>;
-}
-
-function isAppleMobile(): boolean {
-  return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-
-function isStandalone(): boolean {
-  return window.matchMedia?.('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 }
 
 function base64UrlToBytes(s: string): Uint8Array<ArrayBuffer> {
