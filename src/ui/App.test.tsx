@@ -63,7 +63,7 @@ describe('signing in', () => {
     const { auth, calls } = fakeGoogleAuth({ googleAvailable: false });
     const user = renderWithAuth(auth);
     expect(screen.queryByRole('button', { name: 'Sign in with Google' })).not.toBeInTheDocument();
-    expect(screen.getByText(/Google sign-in cannot finish inside the Home Screen app/)).toBeInTheDocument();
+    expect(screen.getByText(/Google sign-in does not work on this phone/)).toBeInTheDocument();
     await user.type(screen.getByLabelText('Email'), 'me@example.com');
     await user.type(screen.getByLabelText('Password'), 'wrong');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));

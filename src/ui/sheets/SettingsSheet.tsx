@@ -4,6 +4,7 @@ import { reminderMessage } from '../../domain/reminder';
 import { setReminder } from '../../domain/settings';
 import type { PushStatus } from '../../services/push';
 import { Sheet } from '../components/Sheet';
+import { BuildStamp } from '../Welcome';
 import { PasswordSetting } from './PasswordSetting';
 import { monthDayYear, time12, weekdayMonthDay } from '../format';
 import { usePlanner } from '../PlannerContext';
@@ -109,6 +110,7 @@ export function SettingsSheet({ onClose, onChangeBirthday }: { onClose: () => vo
           </div>
 
           <button className="btn-outline full" onClick={onClose}>Done</button>
+          <BuildStamp />
         </>
       )}
     </Sheet>

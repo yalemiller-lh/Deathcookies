@@ -12,9 +12,9 @@ export interface AuthService {
   /** 'device': no account, data stays on this device. 'google': a Google account (optionally with a password). */
   readonly kind: 'device' | 'google';
   /**
-   * False where Google sign-in cannot finish: inside a phone's Home Screen app,
-   * Google's page opens in a separate browser layer that loses the sign-in.
-   * There, the account's email and password are used instead.
+   * False where Google sign-in cannot finish (iPhone and iPad, and any phone's
+   * Home Screen app): Google's page loses the sign-in on the way back. There,
+   * the account's email and password are used instead.
    */
   readonly googleAvailable: boolean;
   /** Fires once the session is known, then on every sign-in or sign-out. */

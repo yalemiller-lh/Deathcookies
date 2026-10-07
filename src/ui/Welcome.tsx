@@ -3,6 +3,11 @@ import { useState, type FormEvent } from 'react';
 import type { AuthService } from '../services/auth';
 import { BirthdayForm } from './sheets/BirthdayForm';
 
+/** Shows which version is running, to check a phone has the latest. */
+export function BuildStamp() {
+  return <p className="build-stamp">Version {__BUILD__}</p>;
+}
+
 function BrandMark() {
   return <div className="brand-mark" aria-hidden="true"><span /></div>;
 }
@@ -38,7 +43,7 @@ export function SignIn({ auth }: { auth: AuthService }) {
         <h1 className="welcome-title">Deathcookies</h1>
         <p className="muted">Urgent things first. Three priorities a quarter. A year that starts on your birthday.</p>
         {!auth.googleAvailable && (
-          <p className="preview-box">Google sign-in cannot finish inside the Home Screen app. Use your Google email with the password you set on your computer (Settings → Account).</p>
+          <p className="preview-box">Google sign-in does not work on this phone. Use your Google email with the password you set on your computer (Settings → Account).</p>
         )}
         {usePassword ? (
           <form className="stack-8" onSubmit={submitPassword}>
@@ -57,6 +62,7 @@ export function SignIn({ auth }: { auth: AuthService }) {
           </div>
         )}
         {error && <p className="hint" role="alert">{error}</p>}
+        <BuildStamp />
       </div>
     </main>
   );

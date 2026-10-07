@@ -205,4 +205,5 @@ button.project:hover { border-color: var(--input-border); }
 
 .error-bar { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 14px; background: var(--surface-2); border: 1px solid var(--text); border-radius: 4px; font-size: 14px; }
 .footer { display: flex; justify-content: center; }
+.build-stamp { margin: 0; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--disabled); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

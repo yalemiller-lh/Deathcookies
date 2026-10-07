@@ -5,7 +5,7 @@ import {
   signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, signOut, type Auth, type User,
 } from 'firebase/auth';
 import type { AuthService, Session } from './auth';
-import { isMobile, isStandalone } from './platform';
+import { isAppleMobile, isMobile, isStandalone } from './platform';
 
 const MESSAGES: Record<string, string> = {
   'auth/invalid-credential': 'That email and password do not match. If you have not set a password yet, do it on your computer: Settings → Account.',
@@ -40,12 +40,14 @@ const sessionOf = (user: User): Session => ({
 });
 
 export function firebaseAuth(auth: Auth): AuthService {
-  const standaloneOnPhone = isStandalone() && isMobile();
+  // On iPhone and iPad, Google sign-in fails ("missing initial state") both in the
+  // Home Screen app and in Safari, so they always use email and password.
+  const googleWorks = !isAppleMobile() && !(isStandalone() && isMobile());
   // Finishes a redirect sign-in; the session itself arrives through onAuthStateChanged.
   getRedirectResult(auth).catch(() => {});
   return {
     kind: 'google',
-    googleAvailable: !standaloneOnPhone,
+    googleAvailable: googleWorks,
     onChange: listener => onAuthStateChanged(auth, user => listener(user ? sessionOf(user) : null)),
     async signIn() {
       const provider = new GoogleAuthProvider();
