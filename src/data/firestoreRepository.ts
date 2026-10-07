@@ -1,5 +1,5 @@
 // Firestore adapters: the planner's data and this account's push subscriptions.
-import { collection, deleteDoc, doc, onSnapshot, setDoc, writeBatch, type Firestore } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, setDoc, Timestamp, writeBatch, type Firestore } from 'firebase/firestore';
 import { COLLECTION_NAMES } from '../domain/changes';
 import { entityFromDoc, StateAssembler, writesFor } from './firestoreMapping';
 import type { DeviceRegistry, PlannerRepository } from './repository';
@@ -22,7 +22,7 @@ export function firestoreRepository(db: Firestore, uid: string, timeZone: string
     async apply(changes) {
       if (changes.length === 0) return;
       const batch = writeBatch(db);
-      for (const w of writesFor(uid, changes)) {
+      for (const w of writesFor(uid, changes, Timestamp.fromMillis)) {
         const [first, ...rest] = w.path;
         const ref = doc(db, first!, ...rest);
         if (w.kind === 'delete') batch.delete(ref);
@@ -46,7 +46,7 @@ export function firestoreDevices(db: Firestore, uid: string): DeviceRegistry {
       await setDoc(doc(db, 'users', uid, 'pushSubscriptions', await subscriptionId(subscription.endpoint)), {
         endpoint: subscription.endpoint,
         keys: subscription.keys,
-        createdAt: Date.now(),
+        createdAt: Timestamp.now(),
         userAgent: navigator.userAgent.slice(0, 200),
       });
     },

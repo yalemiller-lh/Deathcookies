@@ -1,7 +1,7 @@
 // ReminderStore over Firestore, through the Admin SDK (which is not bound by
 // firestore.rules; the service account's role limits it to the database).
 import type { Firestore } from 'firebase-admin/firestore';
-import type { Cookie } from '../../src/domain/model';
+import { entityFromDoc } from '../../src/data/firestoreMapping';
 import { DEFAULT_NOTIFICATION_TIME } from '../../src/domain/model';
 import type { ReminderStore, StoredSubscription } from './reminders';
 
@@ -17,7 +17,8 @@ export function firestoreStore(db: Firestore): ReminderStore {
     },
     async cookies(uid) {
       const snap = await db.collection(`users/${uid}/cookies`).get();
-      return snap.docs.map(d => ({ id: d.id, text: String(d.get('text') ?? ''), done: d.get('done') === true, createdAt: Number(d.get('createdAt') ?? 0) }) satisfies Cookie);
+      // Read exactly as the app reads them (timestamps, cleared ones and all).
+      return snap.docs.map(d => entityFromDoc('cookies', d.id, d.data()));
     },
     async subscriptions(uid) {
       const snap = await db.collection(`users/${uid}/pushSubscriptions`).get();

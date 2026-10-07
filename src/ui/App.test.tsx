@@ -125,7 +125,13 @@ describe('deathcookies', () => {
     await user.click(within(cookies).getByRole('checkbox', { name: 'Pay the deposit' }));
     expect(within(cookies).getByText('1 open')).toBeInTheDocument();
     await user.click(within(cookies).getByRole('button', { name: 'Clear the done ones' }));
-    expect(repo.snapshot().cookies.map(c => c.text)).toEqual(['Renew the car tax']);
+    expect(within(cookies).queryByRole('checkbox', { name: 'Pay the deposit' })).not.toBeInTheDocument();
+    expect(within(cookies).getByRole('checkbox', { name: 'Renew the car tax' })).toBeInTheDocument();
+
+    // Cleared, not deleted: the database keeps it with its times.
+    const kept = repo.snapshot().cookies.find(c => c.text === 'Pay the deposit');
+    const now = parseISODate('2026-10-07').getTime();
+    expect(kept).toMatchObject({ done: true, createdAt: now, completedAt: now, clearedAt: now });
   });
 });
 

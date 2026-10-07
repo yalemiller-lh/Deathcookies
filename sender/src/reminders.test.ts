@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Cookie } from '../../src/domain/model';
+import { cookie } from '../../src/test/fixtures';
 import { sendDueReminders, sendToUser, type PushSender, type ReminderStore, type ReminderUser, type SendResult, type StoredSubscription } from './reminders';
 
 function fakeStore(users: ReminderUser[], data: Record<string, { cookies: Cookie[]; subs: StoredSubscription[] }>) {
@@ -27,7 +28,7 @@ const sub = (id: string): StoredSubscription => ({ id, endpoint: `https://push.e
 const user = (uid: string, patch: Partial<ReminderUser> = {}): ReminderUser => ({
   uid, lastReminderDate: null, settings: { notificationsOn: true, notificationTime: '08:30', timeZone: 'UTC' }, ...patch,
 });
-const cookies: Cookie[] = [{ id: 'c1', text: 'Pay the deposit', done: false, createdAt: 1 }, { id: 'c2', text: 'Renew tax', done: false, createdAt: 2 }];
+const cookies: Cookie[] = [cookie('c1', 'Pay the deposit', { createdAt: 1 }), cookie('c2', 'Renew tax', { createdAt: 2 })];
 const at830 = new Date('2026-10-07T08:30:00Z');
 
 describe('sendDueReminders', () => {

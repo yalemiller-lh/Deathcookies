@@ -6,7 +6,19 @@ import { CATEGORIES, defaultSettings, type Category, type PlannerState, type Set
 type Data = Record<string, unknown>;
 
 const str = (v: unknown, fallback = '') => (typeof v === 'string' ? v : fallback);
-const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+/**
+ * Times are stored as Firestore timestamps (readable in the console). Older
+ * documents hold plain millisecond numbers; both read back as milliseconds.
+ */
+function millisOrNull(v: unknown): number | null {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (v && typeof (v as { toMillis?: unknown }).toMillis === 'function') return (v as { toMillis: () => number }).toMillis();
+  return null;
+}
+const millis = (v: unknown) => millisOrNull(v) ?? 0;
+
+/** Entity fields holding a time; written through the adapter's timestamp encoder. */
+const TIME_FIELDS = new Set(['createdAt', 'completedAt', 'clearedAt']);
 const strOrNull = (v: unknown) => (typeof v === 'string' && v ? v : null);
 
 /** The settings fields stored on users/{uid}. */
@@ -25,9 +37,9 @@ export function settingsFromDoc(data: Data | undefined, timeZone: string): Setti
 
 /** Reads a stored document, filling gaps (for example after a hand edit in the Firebase console). */
 export function entityFromDoc<C extends CollectionName>(collection: C, id: string, data: Data): Collections[C] {
-  const createdAt = num(data.createdAt);
+  const createdAt = millis(data.createdAt);
   const read: { [K in CollectionName]: () => Collections[K] } = {
-    cookies: () => ({ id, text: str(data.text), done: data.done === true, createdAt }),
+    cookies: () => ({ id, text: str(data.text), done: data.done === true, createdAt, completedAt: millisOrNull(data.completedAt), clearedAt: millisOrNull(data.clearedAt) }),
     priorities: () => ({
       id, title: str(data.title), why: str(data.why), progress: str(data.progress), createdAt,
       category: CATEGORIES.includes(data.category as Category) ? (data.category as Category) : null,
@@ -49,12 +61,16 @@ export type Write =
   | { kind: 'set'; path: string[]; data: Data; merge: boolean }
   | { kind: 'delete'; path: string[] };
 
-/** The document writes that carry out a list of changes for one user. */
-export function writesFor(uid: string, changes: readonly Change[]): Write[] {
+/**
+ * The document writes that carry out a list of changes for one user.
+ * `encodeTime` turns a millisecond time into the stored form (a Firestore timestamp).
+ */
+export function writesFor(uid: string, changes: readonly Change[], encodeTime: (ms: number) => unknown = ms => ms): Write[] {
   return changes.map(c => {
     if (c.op === 'settings') return { kind: 'set', path: ['users', uid], data: { ...c.patch }, merge: true };
     if (c.op === 'delete') return { kind: 'delete', path: ['users', uid, c.collection, c.id] };
-    const { id, ...data } = c.value;
+    const { id, ...fields } = c.value;
+    const data = Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, TIME_FIELDS.has(k) && typeof v === 'number' ? encodeTime(v) : v]));
     return { kind: 'set', path: ['users', uid, c.collection, id], data, merge: false };
   });
 }

@@ -4,6 +4,7 @@ import { emptyState } from '../domain/model';
 import { localRepository } from './localRepository';
 import { memoryRepository } from './memoryRepository';
 import { repositoryContract } from './repositoryContract';
+import { cookie } from '../test/fixtures';
 
 describe('memoryRepository', () => {
   repositoryContract(() => memoryRepository(emptyState('UTC')));
@@ -14,10 +15,10 @@ describe('localRepository', () => {
 
   it('keeps data across reloads', async () => {
     localStorage.clear();
-    await localRepository(localStorage, 'UTC').apply([put('cookies', { id: 'c1', text: 'Kept', done: false, createdAt: 1 })]);
+    await localRepository(localStorage, 'UTC').apply([put('cookies', cookie('c1', 'Kept'))]);
     let cookies: unknown[] = [];
     localRepository(localStorage, 'UTC').subscribe(s => { cookies = s.cookies; });
-    expect(cookies).toEqual([{ id: 'c1', text: 'Kept', done: false, createdAt: 1 }]);
+    expect(cookies).toEqual([cookie('c1', 'Kept')]);
   });
 
   it('starts fresh when saved data is unreadable', () => {

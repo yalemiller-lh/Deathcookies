@@ -3,6 +3,7 @@ import { expect, it } from 'vitest';
 import { patchSettings, put, remove } from '../domain/changes';
 import type { PlannerState } from '../domain/model';
 import type { PlannerRepository } from './repository';
+import { cookie } from '../test/fixtures';
 
 function latest(repo: PlannerRepository) {
   const seen: PlannerState[] = [];
@@ -21,12 +22,12 @@ export function repositoryContract(makeRepo: () => PlannerRepository) {
     const repo = makeRepo();
     const sub = latest(repo);
     await repo.apply([
-      put('cookies', { id: 'c1', text: 'One', done: false, createdAt: 1 }),
-      put('cookies', { id: 'c2', text: 'Two', done: false, createdAt: 2 }),
+      put('cookies', cookie('c1', 'One', { createdAt: 1 })),
+      put('cookies', cookie('c2', 'Two', { createdAt: 2 })),
       patchSettings({ notificationsOn: true }),
     ]);
-    await repo.apply([remove('cookies', 'c1'), put('cookies', { id: 'c2', text: 'Two', done: true, createdAt: 2 })]);
-    expect(sub.last.cookies).toEqual([{ id: 'c2', text: 'Two', done: true, createdAt: 2 }]);
+    await repo.apply([remove('cookies', 'c1'), put('cookies', cookie('c2', 'Two', { createdAt: 2, done: true, completedAt: 5 }))]);
+    expect(sub.last.cookies).toEqual([cookie('c2', 'Two', { createdAt: 2, done: true, completedAt: 5 })]);
     expect(sub.last.settings.notificationsOn).toBe(true);
   });
 

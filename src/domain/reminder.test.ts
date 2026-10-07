@@ -5,7 +5,7 @@ import { quoteFor, QUOTES } from './quotes';
 import { parseISODate } from './dates';
 import { stateWith } from '../test/fixtures';
 
-const cookie = (id: string, text: string, done = false, createdAt = 1) => ({ id, text, done, createdAt });
+const cookie = (id: string, text: string, done = false, createdAt = 1) => ({ id, text, done, createdAt, completedAt: done ? 9 : null, clearedAt: null });
 
 describe('reminderMessage', () => {
   it('counts open deathcookies and names the first', () => {

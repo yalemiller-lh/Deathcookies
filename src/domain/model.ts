@@ -23,7 +23,12 @@ export interface Cookie {
   id: string;
   text: string;
   done: boolean;
+  /** Times are milliseconds since 1970 (Date.getTime()). */
   createdAt: number;
+  /** When it was ticked off; null while open. */
+  completedAt: number | null;
+  /** When "Clear the done ones" took it off the list; it is kept, not deleted. */
+  clearedAt: number | null;
 }
 
 export type PriorityStatus = 'active' | 'paused';
