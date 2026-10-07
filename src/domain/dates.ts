@@ -128,7 +128,3 @@ export function isReviewWindowOpen(q: Quarter, today: Date): boolean {
   return daysBetween(q.start, today) >= 0 && daysBetween(today, q.end) <= REVIEW_WINDOW_DAYS;
 }
 
-/** 0-based day of the calendar year. */
-export function dayOfYear(today: Date): number {
-  return daysBetween(new Date(today.getFullYear(), 0, 1), today);
-}

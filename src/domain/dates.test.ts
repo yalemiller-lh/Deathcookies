@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  addMonths, dayOfYear, isISODate, isReviewWindowOpen, parseISODate, quarterAfter, quarterOn,
+  addMonths, isISODate, isReviewWindowOpen, parseISODate, quarterAfter, quarterOn,
   quarterProgress, toISODate, workingQuarter,
 } from './dates';
 
@@ -116,12 +116,5 @@ describe('isReviewWindowOpen', () => {
   });
   it('is closed for a quarter that has not started', () => {
     expect(isReviewWindowOpen(quarterAfter(q), d('2026-10-29'))).toBe(false);
-  });
-});
-
-describe('dayOfYear', () => {
-  it('is zero-based', () => {
-    expect(dayOfYear(d('2026-01-01'))).toBe(0);
-    expect(dayOfYear(d('2026-12-31'))).toBe(364);
   });
 });

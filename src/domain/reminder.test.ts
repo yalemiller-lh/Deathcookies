@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { localClock, reminderDueDate, reminderMessage } from './reminder';
 import { checkBirthday, setBirthday, setReminder } from './settings';
-import { quoteFor, QUOTES } from './quotes';
 import { parseISODate } from './dates';
 import { stateWith } from '../test/fixtures';
 
@@ -62,13 +61,5 @@ describe('settings', () => {
     expect(setReminder({ notificationTime: '25:00' })).toEqual({ ok: false, error: 'invalid-time' });
     expect(setReminder({ timeZone: 'Mars/Olympus' })).toEqual({ ok: false, error: 'invalid-time-zone' });
     expect(setReminder({ notificationsOn: true, notificationTime: '07:15' }).ok).toBe(true);
-  });
-});
-
-describe('quoteFor', () => {
-  it('rotates daily through the list', () => {
-    expect(quoteFor(parseISODate('2026-01-01'))).toBe(QUOTES[0]);
-    expect(quoteFor(parseISODate('2026-01-02'))).toBe(QUOTES[1]);
-    expect(quoteFor(parseISODate('2026-01-09'))).toBe(QUOTES[0]);
   });
 });

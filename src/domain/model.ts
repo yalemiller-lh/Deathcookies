@@ -85,6 +85,15 @@ export interface QuarterReview {
   createdAt: number;
 }
 
+/** A quote the person kept (from a screenshot or typed in). */
+export interface SavedQuote {
+  id: string;
+  text: string;
+  /** Who said it; empty when unknown. */
+  by: string;
+  createdAt: number;
+}
+
 export interface PlannerState {
   settings: Settings;
   cookies: Cookie[];
@@ -93,6 +102,7 @@ export interface PlannerState {
   activity: Activity[];
   backburner: Idea[];
   quarterReviews: QuarterReview[];
+  quotes: SavedQuote[];
 }
 
 export const DEFAULT_NOTIFICATION_TIME = '08:30';
@@ -102,7 +112,7 @@ export function defaultSettings(timeZone: string): Settings {
 }
 
 export function emptyState(timeZone = 'UTC'): PlannerState {
-  return { settings: defaultSettings(timeZone), cookies: [], priorities: [], projects: [], activity: [], backburner: [], quarterReviews: [] };
+  return { settings: defaultSettings(timeZone), cookies: [], priorities: [], projects: [], activity: [], backburner: [], quarterReviews: [], quotes: [] };
 }
 
 /** What a command needs from the outside world, injected so rules stay testable. */

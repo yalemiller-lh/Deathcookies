@@ -51,9 +51,9 @@ describe('StateAssembler', () => {
   it('waits for the user document and every collection', () => {
     const a = new StateAssembler('UTC');
     a.setSettings({ birthday: '2002-05-01' });
-    for (const c of ['cookies', 'priorities', 'projects', 'activity', 'backburner'] as const) a.setCollection(c, []);
+    for (const c of ['cookies', 'priorities', 'projects', 'activity', 'backburner', 'quarterReviews'] as const) a.setCollection(c, []);
     expect(a.state()).toBeNull();
-    a.setCollection('quarterReviews', []);
+    a.setCollection('quotes', []);
     expect(a.state()?.settings.birthday).toBe('2002-05-01');
   });
 });

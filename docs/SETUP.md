@@ -85,7 +85,25 @@ GitHub runs whatever is on `main`.
 - **Android**: open it in Chrome → menu → **Install app** → same steps.
 - **Laptop**: open the same address in Chrome or Edge and sign in.
 
-## 6. Test a real notification
+## 6. Save quotes from screenshots (iPhone, optional)
+
+Apple lets only App Store apps into the Share menu, so an iOS Shortcut sends a
+screenshot's text to Deathcookies. Set it up once in the **Shortcuts** app
+(the same steps are in the app: Quotes → Save quotes from screenshots):
+
+1. Tap **+** and name it **Save to Deathcookies**.
+2. Tap **ⓘ**, turn on **Show in Share Sheet**, receive **Images** only.
+3. Add **Extract Text from Image** (input: Shortcut Input).
+4. Add **URL Encode** (input: Text from Image).
+5. Add **Text**: `https://<project-id>.web.app/#quote=` followed by the
+   **URL Encoded Text** variable.
+6. Add **Open URLs**.
+
+Screenshot → Share → **Save to Deathcookies** opens the app in Safari with the
+quote and author filled in, to check and save. The text travels after the
+`#`, so it is never sent to a server. Signing in in Safari is needed once.
+
+## 7. Test a real notification
 
 GitHub → the repository → **Actions → Reminders → Run workflow** (leave
 "Send the current reminder now" ticked). Every device that allowed

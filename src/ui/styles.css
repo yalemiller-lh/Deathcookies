@@ -49,8 +49,8 @@ textarea { resize: vertical; }
 .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
 .h1 { font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -0.03em; text-transform: uppercase; margin: 10px 0 0; }
 .week-line { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
-.quote { display: flex; flex-direction: column; gap: 8px; margin: 0; }
-.quote p { font-weight: 600; font-size: 19px; line-height: 1.3; letter-spacing: -0.01em; margin: 0; text-wrap: pretty; }
+.quote { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; background: none; border: 0; text-align: left; color: var(--text); }
+.quote-text { font-weight: 600; font-size: 19px; line-height: 1.3; letter-spacing: -0.01em; text-wrap: pretty; }
 .quote-by { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
 .label { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
 .para { font-size: 15px; line-height: 1.5; margin: 6px 0 0; color: var(--text-2); text-wrap: pretty; }
@@ -158,6 +158,14 @@ button.project:hover { border-color: var(--input-border); }
 .idea-promote:hover { text-decoration: underline; }
 .idea-remove { min-width: 44px; min-height: 44px; background: none; border: 0; color: var(--disabled); font-size: 20px; line-height: 1; }
 .idea-remove:hover { color: var(--text); }
+.quote-row { display: flex; align-items: flex-start; gap: 4px; padding: 6px 6px 6px 16px; border-bottom: 1px solid var(--border); }
+.quote-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+.quote-row-text { font-size: 15px; line-height: 1.45; color: var(--text-2); text-wrap: pretty; }
+.sheet-title--spaced { margin-top: 8px; }
+.how-to { font-family: var(--font); font-size: 14px; line-height: 1.5; }
+.how-to p { margin: 0; }
+.how-to ol { margin: 8px 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.how-to code { font-family: var(--mono); font-size: 12px; word-break: break-all; color: var(--text); }
 .paused-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
 .paused-title { font-size: 15px; line-height: 1.3; color: var(--text-2); }
 .paused-action { min-height: 44px; padding: 0 8px; background: none; border: 0; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; color: var(--text); }
@@ -205,7 +213,7 @@ button.project:hover { border-color: var(--input-border); }
 .loading { color: var(--faint); font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
 
 .error-bar { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 14px; background: var(--surface-2); border: 1px solid var(--text); border-radius: 4px; font-size: 14px; }
-.footer { display: flex; justify-content: center; }
+.footer { display: flex; justify-content: center; gap: 16px; }
 
 /* "A new version is ready" — the design's notification card */
 .update-bar { position: fixed; z-index: 30; left: 12px; right: 12px; top: calc(env(safe-area-inset-top) + 10px); max-width: 536px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 12px; background: rgba(22, 22, 22, .96); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--dashed); border-radius: 14px; box-shadow: 0 12px 40px rgba(0, 0, 0, .6); animation: dc-toast-in .45s var(--ease-sheet); }

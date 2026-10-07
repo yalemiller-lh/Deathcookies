@@ -53,6 +53,7 @@ export function entityFromDoc<C extends CollectionName>(collection: C, id: strin
       id, quarterKey: str(data.quarterKey), date: str(data.date), createdAt,
       decisions: Array.isArray(data.decisions) ? (data.decisions as Collections['quarterReviews']['decisions']) : [],
     }),
+    quotes: () => ({ id, text: str(data.text), by: str(data.by), createdAt }),
   };
   return read[collection]() as Collections[C];
 }
@@ -96,7 +97,7 @@ export class StateAssembler {
     return {
       settings: this.settings,
       cookies: get('cookies'), priorities: get('priorities'), projects: get('projects'),
-      activity: get('activity'), backburner: get('backburner'), quarterReviews: get('quarterReviews'),
+      activity: get('activity'), backburner: get('backburner'), quarterReviews: get('quarterReviews'), quotes: get('quotes'),
     };
   }
 }

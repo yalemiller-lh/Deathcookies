@@ -242,3 +242,60 @@ describe('new version banner', () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('quotes', () => {
+  function renderQuotes(patch: Partial<PlannerState> = {}, incoming: { text: string; by: string } | null = null) {
+    const base = emptyState('UTC');
+    const repo = memoryRepository({ ...base, ...patch, settings: { ...base.settings, birthday: '2002-05-01' } });
+    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+    let waiting = incoming;
+    render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC"
+      incomingQuote={{ peek: () => waiting, clear: () => { waiting = null; }, onArrive: () => () => {} }} />);
+    return { repo, user: userEvent.setup() };
+  }
+
+  it('saves a typed quote, which then becomes the quote of the day', async () => {
+    const { repo, user } = renderQuotes();
+    await user.click(screen.getByRole('button', { name: 'Quotes' }));
+    expect(screen.getByText(/None yet/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '+ Add a quote' }));
+    await user.type(screen.getByLabelText('Quote'), 'Done is better than perfect.');
+    await user.type(screen.getByLabelText('By'), 'Sheryl Sandberg');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(repo.snapshot().quotes).toMatchObject([{ text: 'Done is better than perfect.', by: 'Sheryl Sandberg' }]);
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.getByRole('button', { name: /Quote of the day: Done is better than perfect\./ })).toBeInTheDocument();
+  });
+
+  it('opens a quote sent from the Shortcut, ready to check and save', async () => {
+    const { repo, user } = renderQuotes({}, { text: 'Well begun is half done.', by: 'Aristotle' });
+    expect(screen.getByRole('dialog', { name: 'Words you have kept' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Quote')).toHaveValue('Well begun is half done.');
+    expect(screen.getByLabelText('By')).toHaveValue('Aristotle');
+    expect(screen.getByText('Read from your screenshot. Check it before saving.')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(repo.snapshot().quotes).toMatchObject([{ text: 'Well begun is half done.', by: 'Aristotle' }]);
+  });
+
+  it('splits a pasted quote into its words and author', async () => {
+    const { user } = renderQuotes();
+    await user.click(screen.getByRole('button', { name: 'Quotes' }));
+    await user.click(screen.getByRole('button', { name: '+ Add a quote' }));
+    await user.click(screen.getByLabelText('Quote'));
+    await user.paste('“Be one.”\n— Marcus Aurelius');
+    expect(screen.getByLabelText('Quote')).toHaveValue('Be one.');
+    expect(screen.getByLabelText('By')).toHaveValue('Marcus Aurelius');
+  });
+
+  it('edits and removes saved quotes', async () => {
+    const { repo, user } = renderQuotes({ quotes: [{ id: 'q1', text: 'Old words', by: '', createdAt: 1 }] });
+    await user.click(screen.getByRole('button', { name: 'Quotes' }));
+    await user.click(screen.getByRole('button', { name: 'Edit "Old words"' }));
+    await user.clear(screen.getByLabelText('Quote'));
+    await user.type(screen.getByLabelText('Quote'), 'New words');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(repo.snapshot().quotes).toMatchObject([{ id: 'q1', text: 'New words' }]);
+    await user.click(screen.getByRole('button', { name: 'Remove "New words"' }));
+    expect(repo.snapshot().quotes).toEqual([]);
+  });
+});

@@ -5,6 +5,7 @@ import { startOfDay } from '../domain/dates';
 import type { CommandContext, PlannerState } from '../domain/model';
 import type { DeviceRegistry, PlannerRepository } from '../data/repository';
 import type { AuthService, Session } from '../services/auth';
+import type { IncomingQuote } from '../services/incomingQuote';
 import type { PushService } from '../services/push';
 
 export interface PlannerServices {
@@ -15,6 +16,8 @@ export interface PlannerServices {
   session: Session;
   clock: () => Date;
   newId: () => string;
+  /** A quote sent in through the app link (the iOS Shortcut). */
+  incomingQuote: IncomingQuote;
 }
 
 interface PlannerValue {

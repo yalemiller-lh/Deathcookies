@@ -72,6 +72,8 @@ users/{uid}/projects/{id}       name, priorityId | null, createdAt
 users/{uid}/activity/{id}       date, text, projectId
 users/{uid}/backburner/{id}     text, date, createdAt
 users/{uid}/quarterReviews/{id} date, quarterKey, decisions[]
+users/{uid}/quotes/{id}         text, by, createdAt — the quote of the day rotates through
+                                these (classics only while there are none)
 users/{uid}/pushSubscriptions/{id}  endpoint, keys, createdAt
 ```
 

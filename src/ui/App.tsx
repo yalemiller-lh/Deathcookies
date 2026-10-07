@@ -4,6 +4,7 @@ import { setReminder } from '../domain/settings';
 import type { Session } from '../services/auth';
 import type { PushService } from '../services/push';
 import type { UpdateWatcher } from '../services/updates';
+import { noIncomingQuote, type IncomingQuote } from '../services/incomingQuote';
 import { Home } from './home/Home';
 import { PlannerProvider, usePlanner, type PlannerServices } from './PlannerContext';
 import { UpdateBanner } from './UpdateBanner';
@@ -18,6 +19,7 @@ export interface AppProps {
   /** Watches for a newer deployed version; omitted in development and tests. */
   watchUpdates?: UpdateWatcher;
   reload?: () => void;
+  incomingQuote?: IncomingQuote;
 }
 
 const systemClock = () => new Date();
@@ -25,13 +27,13 @@ const randomId = () => crypto.randomUUID();
 const systemTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 const reloadPage = () => window.location.reload();
 
-export function App({ backend, makePush, clock = systemClock, newId = randomId, deviceTimeZone = systemTimeZone(), watchUpdates, reload = reloadPage }: AppProps) {
+export function App({ backend, makePush, clock = systemClock, newId = randomId, deviceTimeZone = systemTimeZone(), watchUpdates, reload = reloadPage, incomingQuote = noIncomingQuote }: AppProps) {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   useEffect(() => backend.auth.onChange(setSession), [backend]);
 
   const screen = session === undefined ? <Loading />
     : session === null ? <SignIn auth={backend.auth} />
-    : <SignedIn key={session.uid} {...{ backend, makePush, clock, newId, deviceTimeZone, session }} />;
+    : <SignedIn key={session.uid} {...{ backend, makePush, clock, newId, deviceTimeZone, session, incomingQuote }} />;
   return (
     <>
       {screen}
@@ -40,11 +42,11 @@ export function App({ backend, makePush, clock = systemClock, newId = randomId, 
   );
 }
 
-function SignedIn({ backend, makePush, clock, newId, deviceTimeZone, session }: Required<Omit<AppProps, 'watchUpdates' | 'reload'>> & { session: Session }) {
+function SignedIn({ backend, makePush, clock, newId, deviceTimeZone, session, incomingQuote }: Required<Omit<AppProps, 'watchUpdates' | 'reload'>> & { session: Session }) {
   const services = useMemo<PlannerServices>(() => {
     const { repository, devices } = backend.open(session);
-    return { repository, devices, push: makePush(backend.vapidPublicKey, devices), auth: backend.auth, session, clock, newId };
-  }, [backend, makePush, session, clock, newId]);
+    return { repository, devices, push: makePush(backend.vapidPublicKey, devices), auth: backend.auth, session, clock, newId, incomingQuote };
+  }, [backend, makePush, session, clock, newId, incomingQuote]);
   return (
     <PlannerProvider services={services} loading={<Loading />}>
       <TimeZoneSync zone={deviceTimeZone} />
