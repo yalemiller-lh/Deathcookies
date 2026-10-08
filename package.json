@@ -11,9 +11,10 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "check": "tsc --noEmit && tsc --noEmit -p sender && eslint . && vitest run",
+    "check": "tsc --noEmit && tsc --noEmit -p worker && eslint . && vitest run",
     "deploy": "npm run check && npm run build && firebase deploy",
-    "typecheck:sender": "tsc --noEmit -p sender"
+    "typecheck:worker": "tsc --noEmit -p worker",
+    "deploy:worker": "npm --prefix worker run deploy"
   },
   "dependencies": {
     "firebase": "^12.19.0",

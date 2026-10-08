@@ -64,6 +64,7 @@ export function firebaseAuth(auth: Auth): AuthService {
       await friendly(linkWithCredential(user, EmailAuthProvider.credential(user.email, password)));
       await user.reload();
     },
+    idToken: async () => (auth.currentUser ? auth.currentUser.getIdToken() : null),
     signOut: () => signOut(auth),
   };
 }

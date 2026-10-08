@@ -45,7 +45,7 @@ export function App({ backend, makePush, clock = systemClock, newId = randomId, 
 function SignedIn({ backend, makePush, clock, newId, deviceTimeZone, session, incomingQuote }: Required<Omit<AppProps, 'watchUpdates' | 'reload'>> & { session: Session }) {
   const services = useMemo<PlannerServices>(() => {
     const { repository, devices } = backend.open(session);
-    return { repository, devices, push: makePush(backend.vapidPublicKey, devices), auth: backend.auth, session, clock, newId, incomingQuote };
+    return { repository, devices, push: makePush(backend.vapidPublicKey, devices), reminders: backend.reminders, auth: backend.auth, session, clock, newId, incomingQuote };
   }, [backend, makePush, session, clock, newId, incomingQuote]);
   return (
     <PlannerProvider services={services} loading={<Loading />}>

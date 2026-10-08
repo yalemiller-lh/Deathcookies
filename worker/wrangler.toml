@@ -1,0 +1,14 @@
+# The reminder sender. Runs every 5 minutes; each run reminds whoever's
+# reminder time has come (see worker/src/reminders.ts). Secrets, set with
+# `wrangler secret put`: FIREBASE_SERVICE_ACCOUNT (the key JSON) and
+# VAPID_PRIVATE_KEY. Everything else comes from src/app/firebaseConfig.ts.
+name = "deathcookies-reminders"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[observability]
+enabled = true

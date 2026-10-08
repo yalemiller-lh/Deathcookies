@@ -2,7 +2,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Backend } from './app/backend';
-import { firebaseConfig, vapidPublicKey } from './app/firebaseConfig';
+import { firebaseConfig, reminderServiceUrl, vapidPublicKey } from './app/firebaseConfig';
 import { localBackend } from './app/localBackend';
 import { browserPush } from './services/push';
 import { captureIncomingQuote, incomingQuote } from './services/incomingQuote';
@@ -19,7 +19,7 @@ async function chooseBackend(): Promise<Backend> {
   if (firebaseConfig && !import.meta.env.VITE_LOCAL_ONLY) {
     // Loaded on demand so on-device mode never downloads Firebase.
     const { firebaseBackend } = await import('./app/firebaseBackend');
-    return firebaseBackend(firebaseConfig, vapidPublicKey, timeZone);
+    return firebaseBackend(firebaseConfig, vapidPublicKey, reminderServiceUrl, timeZone);
   }
   return localBackend(localStorage, timeZone);
 }

@@ -6,12 +6,15 @@ import type { CommandContext, PlannerState } from '../domain/model';
 import type { DeviceRegistry, PlannerRepository } from '../data/repository';
 import type { AuthService, Session } from '../services/auth';
 import type { IncomingQuote } from '../services/incomingQuote';
+import type { ReminderService } from '../services/reminderService';
 import type { PushService } from '../services/push';
 
 export interface PlannerServices {
   repository: PlannerRepository;
   devices: DeviceRegistry;
   push: PushService;
+  /** Test sends through the reminder worker; null in on-device mode. */
+  reminders: ReminderService | null;
   auth: AuthService;
   session: Session;
   clock: () => Date;

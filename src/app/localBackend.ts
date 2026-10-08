@@ -8,5 +8,6 @@ export function localBackend(storage: Storage, timeZone: string): Backend {
     auth: deviceAuth,
     open: () => ({ repository: localRepository(storage, timeZone), devices: localDevices }),
     vapidPublicKey: null,
+    reminders: null,
   };
 }

@@ -41,11 +41,11 @@ export function localClock(now: Date, timeZone: string): { date: ISODate; minute
 }
 
 /**
- * How late a reminder may still go out. The scheduler (GitHub Actions) can run
- * late or skip a run, so this is generous; later than this, that day's
- * reminder is skipped rather than arriving at night.
+ * How late a reminder may still go out if a run is missed (the worker runs
+ * every 5 minutes). Later than this, that day's reminder is skipped rather
+ * than arriving hours after its time.
  */
-export const REMINDER_GRACE_MINUTES = 180;
+export const REMINDER_GRACE_MINUTES = 60;
 
 /**
  * The local date to send today's reminder for, or null when nothing is due.

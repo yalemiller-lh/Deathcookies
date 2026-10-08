@@ -23,6 +23,8 @@ export interface AuthService {
   signInWithPassword(email: string, password: string): Promise<void>;
   /** Adds a password to the signed-in Google account. */
   setPassword(password: string): Promise<void>;
+  /** A short-lived token proving who is signed in, for the reminder worker; null when signed out. */
+  idToken(): Promise<string | null>;
   signOut(): Promise<void>;
 }
 
@@ -37,6 +39,7 @@ export const deviceAuth: AuthService = {
   async signIn() {},
   async signInWithPassword() {},
   async setPassword() {},
+  async idToken() { return null; },
   async signOut() {},
 };
 

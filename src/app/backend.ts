@@ -1,6 +1,7 @@
 // What the app runs on: sign-in, storage and push, chosen once at start-up.
 import type { DeviceRegistry, PlannerRepository } from '../data/repository';
 import type { AuthService, Session } from '../services/auth';
+import type { ReminderService } from '../services/reminderService';
 
 export interface Backend {
   auth: AuthService;
@@ -8,4 +9,6 @@ export interface Backend {
   open(session: Session): { repository: PlannerRepository; devices: DeviceRegistry };
   /** Public key for Web Push; null when no server sends reminders. */
   vapidPublicKey: string | null;
+  /** Sends test reminders through the reminder worker; null when there is none. */
+  reminders: ReminderService | null;
 }

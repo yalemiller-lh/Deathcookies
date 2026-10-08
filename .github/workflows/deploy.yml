@@ -11,7 +11,7 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
-      - '.github/workflows/reminders.yml'
+      - 'worker/**'
   workflow_dispatch:
 
 concurrency:
@@ -45,11 +45,11 @@ jobs:
           cache: npm
           cache-dependency-path: |
             package-lock.json
-            sender/package-lock.json
+            worker/package-lock.json
       - if: steps.setup.outputs.ready == 'true'
         run: |
           npm ci --no-audit --no-fund
-          npm ci --no-audit --no-fund --prefix sender
+          npm ci --no-audit --no-fund --prefix worker
       - if: steps.setup.outputs.ready == 'true'
         name: Check
         run: npm run check

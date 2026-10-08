@@ -16,7 +16,7 @@ const fakePush: PushService = { status: () => 'unsupported', enable: async () =>
 function setup(patch: Partial<PlannerState> = {}, date = '2026-10-07', birthday: string | null = '2002-05-01') {
   const base = emptyState('UTC');
   const repo = memoryRepository({ ...base, ...patch, settings: { ...base.settings, birthday } });
-  const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+  const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null, reminders: null };
   let n = 0;
   render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate(date)} newId={() => `new${++n}`} deviceTimeZone="UTC" />);
   return { repo, user: userEvent.setup() };
@@ -37,6 +37,7 @@ function fakeGoogleAuth({ googleAvailable = true, session = null }: { googleAvai
       if (password !== 'right') throw new Error('That email and password do not match.');
     },
     setPassword: async password => { calls.passwordsSet.push(password); },
+    idToken: async () => null,
     signOut: async () => {},
   };
   return { auth, calls };
@@ -45,7 +46,7 @@ function fakeGoogleAuth({ googleAvailable = true, session = null }: { googleAvai
 function renderWithAuth(auth: AuthService) {
   const base = emptyState('UTC');
   const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01' } });
-  const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+  const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null, reminders: null };
   render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC" />);
   return userEvent.setup();
 }
@@ -218,7 +219,7 @@ describe('settings', () => {
     const base = emptyState('UTC');
     const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01', notificationsOn: true, lastReminderDate: '2026-10-06' } });
     const { auth } = fakeGoogleAuth({ session: { uid: 'u1', email: 'me@example.com', hasPassword: false } });
-    const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+    const backend: Backend = { auth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null, reminders: null };
     render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC" />);
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Settings' }));
@@ -231,7 +232,7 @@ describe('new version banner', () => {
   it('offers a reload once a newer version is live', async () => {
     const base = emptyState('UTC');
     const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01' } });
-    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null, reminders: null };
     let announce = () => {};
     const reload = vi.fn();
     render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC"
@@ -247,7 +248,7 @@ describe('quotes', () => {
   function renderQuotes(patch: Partial<PlannerState> = {}, incoming: { text: string; by: string } | null = null) {
     const base = emptyState('UTC');
     const repo = memoryRepository({ ...base, ...patch, settings: { ...base.settings, birthday: '2002-05-01' } });
-    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null };
+    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: null, reminders: null };
     let waiting = incoming;
     render(<App backend={backend} makePush={() => fakePush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC"
       incomingQuote={{ peek: () => waiting, clear: () => { waiting = null; }, onArrive: () => () => {} }} />);
@@ -297,5 +298,21 @@ describe('quotes', () => {
     expect(repo.snapshot().quotes).toMatchObject([{ id: 'q1', text: 'New words' }]);
     await user.click(screen.getByRole('button', { name: 'Remove "New words"' }));
     expect(repo.snapshot().quotes).toEqual([]);
+  });
+});
+
+describe('test notification', () => {
+  it('asks the reminder service to send one, and says how it went', async () => {
+    const base = emptyState('UTC');
+    const repo = memoryRepository({ ...base, settings: { ...base.settings, birthday: '2002-05-01' } });
+    const sendTest = vi.fn(async () => ({ sent: 1, failed: 0, removed: 0 }));
+    const backend: Backend = { auth: deviceAuth, open: () => ({ repository: repo, devices: localDevices }), vapidPublicKey: 'k', reminders: { sendTest } };
+    const grantedPush: PushService = { status: () => 'granted', enable: async () => 'granted', showNow: async () => {} };
+    render(<App backend={backend} makePush={() => grantedPush} clock={() => parseISODate('2026-10-07')} deviceTimeZone="UTC" />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+    await user.click(screen.getByRole('button', { name: 'Send a test notification' }));
+    expect(sendTest).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('Sent to 1 device. It should arrive in a few seconds.')).toBeInTheDocument();
   });
 });

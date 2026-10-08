@@ -1,7 +1,8 @@
 node_modules/
 dist/
-sender/lib/
-sender/node_modules/
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars
 .firebase/
 *.log
 .env.local
