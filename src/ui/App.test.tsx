@@ -158,6 +158,26 @@ describe('weeklies', () => {
   });
 });
 
+describe('major goals', () => {
+  it('sits under Weeklies, and adds, achieves and removes goals', async () => {
+    const { user, repo } = setup();
+    const sections = screen.getAllByRole('region').map(r => r.getAttribute('aria-label'));
+    expect(sections.indexOf('Major goals')).toBe(sections.indexOf('Weeklies') + 1);
+
+    const goals = section('Major goals');
+    await user.type(within(goals).getByLabelText('New major goal'), 'Run a half marathon{Enter}');
+    await user.type(within(goals).getByLabelText('New major goal'), 'Launch the Substack{Enter}');
+    expect(within(goals).getByText('0 of 2')).toBeInTheDocument();
+
+    await user.click(within(goals).getByRole('checkbox', { name: 'Launch the Substack' }));
+    expect(within(goals).getByText('1 of 2')).toBeInTheDocument();
+    expect(repo.snapshot().goals.find(g => g.text === 'Launch the Substack')).toMatchObject({ done: true, completedAt: parseISODate('2026-10-07').getTime() });
+
+    await user.click(within(goals).getByRole('button', { name: 'Remove Run a half marathon' }));
+    expect(repo.snapshot().goals.map(g => g.text)).toEqual(['Launch the Substack']);
+  });
+});
+
 describe('rejection therapy', () => {
   it('opens from the tab bar and fills in cards one at a time', async () => {
     const { user, repo } = setup();

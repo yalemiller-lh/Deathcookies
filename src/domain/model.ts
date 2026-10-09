@@ -34,6 +34,16 @@ export interface Weekly {
   createdAt: number;
 }
 
+/** A major goal. It stays on the list once achieved, until removed. */
+export interface Goal {
+  id: string;
+  text: string;
+  done: boolean;
+  /** When it was achieved; null while still being worked toward. */
+  completedAt: number | null;
+  createdAt: number;
+}
+
 export const REJECTION_TOTAL = 100;
 
 /** One completed Rejection Therapy card. */
@@ -61,6 +71,7 @@ export interface PlannerState {
   settings: Settings;
   cookies: Cookie[];
   weeklies: Weekly[];
+  goals: Goal[];
   rejections: Rejection[];
   quotes: SavedQuote[];
 }
@@ -72,7 +83,7 @@ export function defaultSettings(timeZone: string): Settings {
 }
 
 export function emptyState(timeZone = 'UTC'): PlannerState {
-  return { settings: defaultSettings(timeZone), cookies: [], weeklies: [], rejections: [], quotes: [] };
+  return { settings: defaultSettings(timeZone), cookies: [], weeklies: [], goals: [], rejections: [], quotes: [] };
 }
 
 /** What a command needs from the outside world, injected so rules stay testable. */

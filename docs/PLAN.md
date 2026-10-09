@@ -9,7 +9,8 @@ Two tabs, switched by a bottom tab bar:
 
 - **Today**: date, year/quarter and week line, quote of the day, Deathcookies
   (urgent to-dos, kept with created/completed/cleared times), and **Weeklies**
-  (a recurring checklist whose ticks clear every Monday).
+  (a recurring checklist whose ticks clear every Monday), and **Major goals**
+  (big things being worked toward; ticking one records when it was achieved).
 - **Rejection Therapy**: 100 numbered cards, done one at a time.
 
 Plus Quotes (saved quotes, also from screenshots via an iOS Shortcut),
@@ -56,7 +57,7 @@ src/
   domain/      Pure TypeScript. No React, no Firebase.
                model.ts      entity types
                dates.ts      birthday year, quarters, week line, Mondays
-               cookies.ts, weeklies.ts, rejections.ts, quotes.ts, settings.ts   rules
+               cookies.ts, weeklies.ts, goals.ts, rejections.ts, quotes.ts, settings.ts   rules
                changes.ts    Change type + applyChanges()
                reminder.ts   notification text + "is it due now?" (shared with the server)
   data/        Persistence behind PlannerRepository { subscribe, apply(changes) }.
@@ -89,6 +90,8 @@ users/{uid}                     settings: birthday, timeZone, notificationsOn,
 users/{uid}/cookies/{id}        text, done, createdAt, completedAt, clearedAt (never deleted;
                                 cleared ones are hidden from the list). Times are timestamps.
 users/{uid}/weeklies/{id}       text, doneWeek (ISO Monday | null), createdAt
+users/{uid}/goals/{id}          text, done, completedAt, createdAt (added 2026-10-09 at the
+                                user's request; not in the design handoff)
 users/{uid}/rejections/{id}     n (1–100), date, createdAt; id = no-NNN
 users/{uid}/quotes/{id}         text, by, createdAt — the quote of the day rotates through
                                 these (classics only while there are none)

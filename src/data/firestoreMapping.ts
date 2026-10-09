@@ -40,6 +40,7 @@ export function entityFromDoc<C extends CollectionName>(collection: C, id: strin
   const read: { [K in CollectionName]: () => Collections[K] } = {
     cookies: () => ({ id, text: str(data.text), done: data.done === true, createdAt, completedAt: millisOrNull(data.completedAt), clearedAt: millisOrNull(data.clearedAt) }),
     weeklies: () => ({ id, text: str(data.text), doneWeek: strOrNull(data.doneWeek), createdAt }),
+    goals: () => ({ id, text: str(data.text), done: data.done === true, completedAt: millisOrNull(data.completedAt), createdAt }),
     rejections: () => ({ id, n: typeof data.n === 'number' ? data.n : 0, text: str(data.text), date: str(data.date), createdAt }),
     quotes: () => ({ id, text: str(data.text), by: str(data.by), createdAt }),
   };
@@ -84,7 +85,7 @@ export class StateAssembler {
     const get = <C extends CollectionName>(c: C) => this.parts.get(c) as Collections[C][];
     return {
       settings: this.settings,
-      cookies: get('cookies'), weeklies: get('weeklies'), rejections: get('rejections'), quotes: get('quotes'),
+      cookies: get('cookies'), weeklies: get('weeklies'), goals: get('goals'), rejections: get('rejections'), quotes: get('quotes'),
     };
   }
 }

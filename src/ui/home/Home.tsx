@@ -8,6 +8,7 @@ import { BirthdaySheet } from '../sheets/BirthdaySheet';
 import { QuotesSheet } from '../sheets/QuotesSheet';
 import { SettingsSheet } from '../sheets/SettingsSheet';
 import { Cookies } from './Cookies';
+import { Goals } from './Goals';
 import { Header } from './Header';
 import { Weeklies } from './Weeklies';
 
@@ -43,6 +44,7 @@ export function Home() {
           <Header quarter={quarter} progress={quarterProgress(quarter, today)} today={today} quote={quoteOfTheDay(today, state.quotes)} onOpenQuotes={() => setSheet({ kind: 'quotes', incoming: null })} />
           <Cookies />
           <Weeklies />
+          <Goals />
           <footer className="footer">
             <button className="text-btn" onClick={() => setSheet({ kind: 'quotes', incoming: null })}>Quotes</button>
             <button className="text-btn" onClick={() => setSheet({ kind: 'settings' })}>Settings</button>
