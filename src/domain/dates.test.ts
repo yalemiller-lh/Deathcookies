@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  addMonths, isISODate, isReviewWindowOpen, parseISODate, quarterAfter, quarterOn,
-  quarterProgress, toISODate, workingQuarter,
+  addMonths, isISODate, mondayOf, parseISODate, quarterAfter, quarterOn,
+  quarterProgress, toISODate,
 } from './dates';
 
 const d = parseISODate;
@@ -75,14 +75,6 @@ describe('quarterAfter', () => {
   });
 });
 
-describe('workingQuarter', () => {
-  it('moves on to the next quarter once the current one is closed', () => {
-    const q = workingQuarter('2002-05-01', d('2026-10-29'), ['24-1']);
-    expect(q.key).toBe('24-2');
-    expect(toISODate(q.start)).toBe('2026-11-01');
-  });
-});
-
 describe('quarterProgress', () => {
   const q = quarterOn('2002-05-01', d('2026-10-07'));
 
@@ -107,14 +99,11 @@ describe('quarterProgress', () => {
   });
 });
 
-describe('isReviewWindowOpen', () => {
-  const q = quarterOn('2002-05-01', d('2026-10-07'));
-  it('opens 14 days before the quarter ends', () => {
-    expect(isReviewWindowOpen(q, d('2026-10-16'))).toBe(false);
-    expect(isReviewWindowOpen(q, d('2026-10-17'))).toBe(true);
-    expect(isReviewWindowOpen(q, d('2026-10-31'))).toBe(true);
-  });
-  it('is closed for a quarter that has not started', () => {
-    expect(isReviewWindowOpen(quarterAfter(q), d('2026-10-29'))).toBe(false);
+describe('mondayOf', () => {
+  it('finds the Monday that starts the week, local time', () => {
+    expect(toISODate(mondayOf(d('2026-10-07')))).toBe('2026-10-05'); // Wednesday
+    expect(toISODate(mondayOf(d('2026-10-05')))).toBe('2026-10-05'); // Monday
+    expect(toISODate(mondayOf(d('2026-10-11')))).toBe('2026-10-05'); // Sunday
+    expect(toISODate(mondayOf(d('2026-11-01')))).toBe('2026-10-26'); // across a month (and a DST change)
   });
 });

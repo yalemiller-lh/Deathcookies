@@ -1,7 +1,7 @@
 // How planner data is laid out in Firestore (see docs/PLAN.md), kept free of
 // the Firebase SDK so the mapping can be tested on its own.
 import { COLLECTION_NAMES, type Change, type CollectionName, type Collections } from '../domain/changes';
-import { CATEGORIES, defaultSettings, type Category, type PlannerState, type Settings } from '../domain/model';
+import { defaultSettings, type PlannerState, type Settings } from '../domain/model';
 
 type Data = Record<string, unknown>;
 
@@ -30,7 +30,6 @@ export function settingsFromDoc(data: Data | undefined, timeZone: string): Setti
     timeZone: str(data.timeZone, d.timeZone),
     notificationsOn: data.notificationsOn === true,
     notificationTime: str(data.notificationTime, d.notificationTime),
-    closedQuarterKeys: Array.isArray(data.closedQuarterKeys) ? data.closedQuarterKeys.filter((k): k is string => typeof k === 'string') : [],
     lastReminderDate: strOrNull(data.lastReminderDate),
   };
 }
@@ -40,19 +39,8 @@ export function entityFromDoc<C extends CollectionName>(collection: C, id: strin
   const createdAt = millis(data.createdAt);
   const read: { [K in CollectionName]: () => Collections[K] } = {
     cookies: () => ({ id, text: str(data.text), done: data.done === true, createdAt, completedAt: millisOrNull(data.completedAt), clearedAt: millisOrNull(data.clearedAt) }),
-    priorities: () => ({
-      id, title: str(data.title), why: str(data.why), progress: str(data.progress), createdAt,
-      category: CATEGORIES.includes(data.category as Category) ? (data.category as Category) : null,
-      status: data.status === 'paused' ? 'paused' : 'active',
-      adjust: strOrNull(data.adjust),
-    }),
-    projects: () => ({ id, name: str(data.name), priorityId: strOrNull(data.priorityId), createdAt }),
-    activity: () => ({ id, projectId: str(data.projectId), date: str(data.date), text: str(data.text), createdAt }),
-    backburner: () => ({ id, text: str(data.text), date: str(data.date), createdAt }),
-    quarterReviews: () => ({
-      id, quarterKey: str(data.quarterKey), date: str(data.date), createdAt,
-      decisions: Array.isArray(data.decisions) ? (data.decisions as Collections['quarterReviews']['decisions']) : [],
-    }),
+    weeklies: () => ({ id, text: str(data.text), doneWeek: strOrNull(data.doneWeek), createdAt }),
+    rejections: () => ({ id, n: typeof data.n === 'number' ? data.n : 0, date: str(data.date), createdAt }),
     quotes: () => ({ id, text: str(data.text), by: str(data.by), createdAt }),
   };
   return read[collection]() as Collections[C];
@@ -96,8 +84,7 @@ export class StateAssembler {
     const get = <C extends CollectionName>(c: C) => this.parts.get(c) as Collections[C][];
     return {
       settings: this.settings,
-      cookies: get('cookies'), priorities: get('priorities'), projects: get('projects'),
-      activity: get('activity'), backburner: get('backburner'), quarterReviews: get('quarterReviews'), quotes: get('quotes'),
+      cookies: get('cookies'), weeklies: get('weeklies'), rejections: get('rejections'), quotes: get('quotes'),
     };
   }
 }

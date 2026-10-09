@@ -16,8 +16,7 @@ export function setBirthday(state: PlannerState, value: string, today: Date): Ou
   const error = checkBirthday(value, today);
   if (error) return { ok: false, error };
   if (value === state.settings.birthday) return { ok: true, changes: [] };
-  // Quarter keys are counted from the birthday, so old "closed" marks no longer apply.
-  return { ok: true, changes: [patchSettings({ birthday: value, closedQuarterKeys: [] })] };
+  return { ok: true, changes: [patchSettings({ birthday: value })] };
 }
 
 export type ReminderError = 'invalid-time' | 'invalid-time-zone';

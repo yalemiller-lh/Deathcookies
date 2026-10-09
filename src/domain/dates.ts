@@ -29,6 +29,11 @@ export function addDays(d: Date, n: number): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 }
 
+/** The Monday that starts d's week (weeks run Monday to Sunday, local time). */
+export function mondayOf(d: Date): Date {
+  return addDays(d, -((d.getDay() + 6) % 7));
+}
+
 function daysInMonth(year: number, monthIndex: number): number {
   return new Date(year, monthIndex + 1, 0).getDate();
 }
@@ -85,18 +90,8 @@ export function quarterAfter(q: Quarter): Quarter {
   return { yearNumber, index, start: q.nextStart, end: addDays(nextStart, -1), nextStart, key: quarterKey(yearNumber, index) };
 }
 
-/**
- * The quarter the planner is working in: the calendar quarter, or the one after
- * it once its review has closed it early.
- */
-export function workingQuarter(birthday: ISODate, today: Date, closedKeys: readonly string[]): Quarter {
-  let q = quarterOn(birthday, today);
-  while (closedKeys.includes(q.key)) q = quarterAfter(q);
-  return q;
-}
-
 export interface QuarterProgress {
-  /** The quarter has not started yet (its predecessor was closed early). */
+  /** The quarter has not started yet. */
   upcoming: boolean;
   totalDays: number;
   /** 1-based day of the quarter; 0 while upcoming. */
@@ -120,11 +115,3 @@ export function quarterProgress(q: Quarter, today: Date): QuarterProgress {
   const week = Math.min(totalWeeks, Math.floor((dayNumber - 1) / 7) + 1);
   return { upcoming: false, totalDays, dayNumber, daysLeft: totalDays - dayNumber, totalWeeks, week, weeksLeft: totalWeeks - week, daysUntilStart: 0 };
 }
-
-/** The quarter review opens in the last 14 days of a quarter that has started. */
-export const REVIEW_WINDOW_DAYS = 14;
-
-export function isReviewWindowOpen(q: Quarter, today: Date): boolean {
-  return daysBetween(q.start, today) >= 0 && daysBetween(today, q.end) <= REVIEW_WINDOW_DAYS;
-}
-

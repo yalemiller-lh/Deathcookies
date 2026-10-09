@@ -1,6 +1,6 @@
 // Test helpers: a deterministic command context and a quick state builder.
 import { parseISODate } from '../domain/dates';
-import { emptyState, type CommandContext, type Cookie, type PlannerState, type Priority } from '../domain/model';
+import { emptyState, type CommandContext, type Cookie, type PlannerState } from '../domain/model';
 
 export function testContext(isoDate = '2026-10-07', startAt = 1): CommandContext & { advance: () => void } {
   let n = startAt;
@@ -14,12 +14,6 @@ export function testContext(isoDate = '2026-10-07', startAt = 1): CommandContext
 
 export function cookie(id: string, text: string, patch: Partial<Cookie> = {}): Cookie {
   return { id, text, done: false, createdAt: 1, completedAt: null, clearedAt: null, ...patch };
-}
-
-let created = 0;
-
-export function priority(id: string, patch: Partial<Priority> = {}): Priority {
-  return { id, title: `Priority ${id}`, category: null, why: '', progress: '', status: 'active', adjust: null, createdAt: ++created, ...patch };
 }
 
 export function stateWith(patch: Partial<PlannerState> = {}, settings: Partial<PlannerState['settings']> = {}): PlannerState {

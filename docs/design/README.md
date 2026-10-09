@@ -1,154 +1,123 @@
-# Handoff: Deathcookies — personal quarterly planner (mobile)
+# Handoff: Deathcookies — Weeklies, Rejection Therapy, tab bar
 
 ## Overview
-Deathcookies is a single-screen, mobile-first personal planner. The user's **planning year starts on their birthday** (default: May 1, user born 2002 → currently Year 24) and is split into **four quarters of three calendar months**. The home screen shows:
+This update to the Deathcookies app (`yalemiller-lh/Deathcookies`) does four things:
+1. **Removes** Priorities (with projects, the editor, Set aside), the Backburner, the Promote sheet and the Quarter review sheet/card.
+2. **Adds Weeklies**: a recurring checklist whose ticks clear every Monday.
+3. **Adds a second tab, Rejection Therapy**: 100 numbered cards, done one at a time.
+4. **Adds a bottom tab bar**: `Today` · `Rejection Therapy`.
 
-1. Today's date + where you are in the quarter (week X of Y, weeks left)
-2. A quote of the day
-3. **Deathcookies** — urgent to-dos that need doing ASAP (checklist)
-4. **Priorities** — max 3 goals for the quarter, each tagged with a category and holding sub-card projects
-5. **Backburner** — ideas to think on/explore later, promotable to priorities
-6. **Set aside** — paused priorities (only shown if any)
+These stay as they are now in the repo: header, quote of the day (opens the Quotes sheet), Deathcookies, footer (Quotes · Settings), Settings sheet, Quotes sheet, Birthday sheet, update banner and the daily reminder.
 
-A daily push notification tells the user how many deathcookies are left to "eat".
-
-Tone matters: the app helps you orient, it never grades you. No streaks, no scores, no "overdue" counters, no guilt copy.
-
-## About the Design Files
-The files in this bundle are **design references created in HTML** — a prototype showing intended look and behavior, **not production code to copy**. Recreate the design in the target environment. No codebase exists yet; recommended: **React Native (Expo)** or **SwiftUI** for a real iOS app with local notifications, or a **PWA** (React + Vite, localStorage/IndexedDB, Web Push) if a home-screen web app is enough.
-
-Open `Deathcookies.dc.html` in a browser to see it running inside an iPhone frame (it needs `support.js` and `ios-frame.jsx` beside it). The logic class at the bottom of that file holds all date math, sample data and state transitions — read it as a spec.
+## About the design files
+`Deathcookies.dc.html` is a **design reference built in HTML**. It's a prototype that shows the intended look and behaviour; it isn't production code. Rebuild it in the existing codebase (React + TypeScript + Vite, Firestore, layered `domain/ → data/ → ui/`), following the repo's patterns: pure domain commands that return `Change[]`, class names in `src/ui/styles.css`, and the tokens already defined there. Open the file in a browser to try it. The Tweaks panel has a **scenario** switch (Oct 7 / Oct 12 / Oct 29); moving to a different week shows Weeklies resetting.
 
 ## Fidelity
-**High-fidelity.** Colors, type, spacing, copy and interactions are final. Recreate pixel-accurately. (Some sample content — studio, running, Nan — is placeholder data.)
+**High fidelity.** Colours, type and spacing match `src/ui/styles.css` exactly. Reuse the existing classes wherever this README names them.
 
-## Design language
-Black and white only, dark, edgy. No accent colors. Uppercase heavy grotesk headings, monospace micro-labels, hairline borders, nearly-square corners (2–4px). Primary actions are solid white buttons with black text; secondary are 1px outlined.
+---
 
-## Screen: Home (the only screen)
-Phone width 402×874 reference (iPhone 16 Pro). Content column: padding `62px 16px 48px` inside the device (top clears status bar; in a real app use safe-area insets + 16px sides), max-width 560px, centered. Single scroll view. Sections stacked with **24px gap**.
+## Screens
 
-### 1. Header
-- Eyebrow: `YEAR {n} · QUARTER {q}` — JetBrains Mono 11px, letter-spacing .14em, uppercase, `#8a8a8a`.
-- H1: today's date, e.g. `WEDNESDAY, OCTOBER 7` — Archivo 800, 34px, line-height 1, letter-spacing −0.03em, uppercase, `#f5f5f5`, margin-top 10px.
-- Week line: `WEEK 10 OF 13 · 3 WEEKS LEFT` (last week → `final week`; `1 week left` singular) — JetBrains Mono 12px, .06em, uppercase, `#a8a8a8`, margin-top 10px.
+### Tab bar (new; on every screen)
+- Fixed to the bottom of the viewport, `z-index: 10`, background `#000`, `border-top: 1px solid var(--border)` (#262626).
+- Padding is `6px 8px` plus `calc(14px + env(safe-area-inset-bottom))` at the bottom.
+- Two equal buttons (`flex: 1`), `min-height: 48px`, laid out as a column with `gap: 6px`, centred.
+  - Indicator: a `24×2px` bar above the label, `var(--text)` when active and transparent otherwise.
+  - Label: `var(--mono)` 11px, `letter-spacing: .1em`, uppercase. Active: `var(--text)` at weight 600. Inactive: `var(--faint)` (#8a8a8a) at weight 500.
+- Labels: **Today**, **Rejection Therapy**.
+- Switching tabs scrolls to the top (`window.scrollTo({ top: 0 })`).
+- `.page` needs extra bottom padding so content clears the bar: about `calc(env(safe-area-inset-bottom) + 110px)`.
+- Use `role="tablist"`/`role="tab"` with `aria-selected`.
 
-### 2. Quote of the day
-- Quote: `“…”` Archivo 600, 19px, line-height 1.3, letter-spacing −0.01em, `text-wrap: pretty`.
-- Attribution: `— Seneca` JetBrains Mono 12px, .06em, `#a8a8a8`. 8px gap.
-- Rotates daily: `QUOTES[dayOfYear % QUOTES.length]` (list in the logic class; public-domain/classical quotes).
+### Today tab (the current `Home`, reduced)
+Order inside `.column` (gap 24px):
+1. `Header` (unchanged): eyebrow `YEAR n · QUARTER n`, the `.h1` date, and the `.week-line`.
+2. The quote button (unchanged).
+3. `Cookies` (unchanged).
+4. **Weeklies** (new, described below).
+5. `footer.footer`: `Quotes` · `Settings` (unchanged).
 
-### 3. Deathcookies
-- Section header row (used by every section): flex, space-between, baseline; bottom border 1px `#262626`, padding-bottom 8px.
-  - Title: Archivo 700, 17px, letter-spacing .02em, uppercase. Text: `DEATHCOOKIES`.
-  - Right meta: `3 OPEN` JetBrains Mono 11px, .1em, uppercase, `#8a8a8a`.
-- List container: bg `#0f0f0f`, 1px `#262626`, radius 4px.
-- Row (whole row is a toggle button): min-height 52px, padding 14px 16px, 14px gap, bottom border 1px `#262626`, hover bg `#141414`.
-  - Checkbox: 20×20, 1.5px `#f5f5f5` border, radius 2px; checked = filled `#f5f5f5`. 150ms bg transition.
-  - Text: 15px/1.45. Done → `line-through`, color `#6a6a6a`.
-- Add row: grid `1fr auto`, gap 8, padding `10px 10px 10px 16px`. Input is underline-only (1px `#333`, focus `#f5f5f5`), placeholder `Something that cannot wait…`, 16px. Button `ADD` outlined (1px `#333`, hover border `#f5f5f5`), mono 12px .1em.
-- Below list, only if any done: text button `CLEAR THE DONE ONES` mono 12px `#8a8a8a`, hover `#f5f5f5`.
+Remove: the `closedNotice` notice, the review card, `Priorities`, `Backburner`, `SetAside`, `PromoteSheet` and `QuarterReviewSheet`.
 
-### 4. Quarter-review card (conditional)
-Only shown in the last 14 days of a quarter. Full-width button: bg `#000`, 1px `#f5f5f5` border, radius 4, padding 16.
-- Title `QUARTER 2 CLOSES SATURDAY, OCTOBER 31` (or `…CLOSES TODAY`) Archivo 700 19px uppercase.
-- Body `Look back over each priority and decide what to carry into the next quarter. Ready when you are.` 14px `#a8a8a8`.
-- CTA `BEGIN THE QUARTER REVIEW →` mono 12px .1em 600.
-- Opens the Quarter Review sheet (below).
+### Weeklies section (new)
+It's built the same way as `Cookies`:
+- `section.section` with `SectionHeader title="Weeklies" meta="{done} of {total}"`, e.g. `2 of 5`.
+- `div.list` contains one row per item, then `AddRow` with placeholder **"Something to do every week…"**, label "New weekly".
+- **Row:** a flex row with `border-bottom: 1px solid var(--border)`, holding:
+  - A checkbox button with `flex: 1`. Use `.cookie-row` styling but with `padding: 14px 0 14px 16px` and no border of its own: `.checkbox` + `.cookie-text`, adding `is-on` / `is-done` when ticked this week. Use `role="checkbox"` and `aria-checked`.
+  - A remove button styled as `.idea-remove` (44×44, `×`, colour `var(--disabled)`, hover `var(--text)`), `aria-label="Remove {text}"`.
+- Under the list: `span.hint` (mono 12px), colour `var(--faint)`, reading **`Resets Monday, {Month D}`**. The date is next week's Monday.
 
-After closing a quarter, a dismissible notice card appears here: bg `#0f0f0f`, border `#262626`: `QUARTER 2 IS CLOSED.` / `Quarter 3 begins November 1 with 2 priorities carried forward. Choose the rest when you are ready.` / `OKAY`.
+**Reset rule.** Each item stores `doneWeek: ISODate | null`, which is the Monday that starts the week it was ticked. An item counts as done only when `doneWeek === mondayOf(today)`. Nothing has to run on Monday: last week's ticks just stop matching. Ticking sets `doneWeek` to this week's Monday; unticking sets it to null. Weeks start on **Monday** in the device's local time: `mondayOf(d) = d − ((d.getDay() + 6) % 7)` days.
 
-### 5. Priorities
-Header: `PRIORITIES` / `3 OF 3`. Cards stacked, 10px gap. **Max 3 active.**
+### Rejection Therapy tab (new)
+`.column`, gap 24px:
+1. **Header**
+   - Eyebrow (`.eyebrow`): `REJECTION THERAPY`.
+   - `.h1`: the percentage done, `Math.round(done / 100 * 100)%`, e.g. **`2%`**.
+   - `.week-line`: `{100 − done} NOS TO GO`, using singular "no" when 1 is left. When all 100 are done it reads `ALL ONE HUNDRED`.
+2. **Section** (`section.section`) with `SectionHeader title="100 rejections" meta="{done} done"`.
+3. **Current card** (shown while done < 100)
+   - A `form`, laid out as a column with gap 12px, padding `14px 16px`, background `var(--surface)` (#0f0f0f), `1px solid var(--text)`, radius 4px.
+   - First row (gap 14px): an empty `.checkbox` (20px, `1.5px solid var(--text)`), then `No. {NN}` in mono 12px, `letter-spacing: .1em`, uppercase, weight 600. Numbers are zero-padded to two digits (`03`); card 100 shows `100`.
+   - A `.btn-primary.full` labelled **Submit**, min-height 48px.
+   - There's no text field. Submit just marks this card done.
+4. **When all 100 are done**, replace the card with a `.notice`: title **"A hundred no's."**, body **"Every card is filled. They are all below."**
+5. **List** (`div.list`), in this order:
+   - **Upcoming cards**, from current + 1 to 100, one row each:
+     - Flex row, gap 14px, `min-height: 44px`, padding `10px 16px`, bottom border.
+     - An empty checkbox with border `var(--dashed)` (#3a3a3a).
+     - `No. {NN}` in mono 12px, `letter-spacing: .1em`, uppercase, colour `var(--disabled)` (#6a6a6a).
+   - **Done cards** at the bottom, in the order they were completed (No. 01 first):
+     - Row with gap 14px, padding `14px 16px`, bottom border.
+     - A filled checkbox (`.checkbox.is-on`).
+     - Then a column holding `No. {NN}` (mono 12px, `var(--faint)`) on the left and the date on the right: `Oct 5`, mono 11px, `letter-spacing: .06em`, uppercase, `var(--disabled)`.
 
-**Collapsed card** (default) — bg `#0f0f0f`, 1px `#262626`, radius 4, padding `14px 16px`. Whole header is one button (min-height 44):
-- Left: roman numeral `I`/`II`/`III` mono 12px `#8a8a8a`, min-width 22, padding-top 4.
-- Category tag (above title): `HEALTH` mono 10px, .14em, uppercase, padding `3px 7px`, 1px `#f5f5f5` border, radius 2.
-- Title: Archivo 600, 18px/1.25, −0.01em.
-- Right: chevron (9×9 box, 1.5px right+bottom border `#8a8a8a`, rotate 45° collapsed → −135° expanded, 200ms).
-- **Nothing else shows when collapsed** — only tag + title.
+Submitting moves the card from the top to the bottom of the list, and the next number becomes the current card.
 
-**Expanded** — divider (1px `#262626`, padding-top 12) then, 12px gap:
-- Optional "Adjusted" note: 1px `#f5f5f5` box, radius 3, `ADJUSTED` mono label + note text 14px.
-- Project sub-cards: bg `#161616`, 1px `#2a2a2a`, radius 3, padding `12px 14px`. Name 15px 600; last activity mono 12px `#a8a8a8` e.g. `THU · 5 km in the rain` (none → `Quiet last week` in `#6a6a6a`).
-- Empty: dashed 1px `#3a3a3a` box `No projects connected yet.`
-- Inline add-project form (when toggled): input + white `ADD` button.
-- `WHY IT MATTERS` (mono 11px .14em `#8a8a8a`) + 15px/1.5 `#d0d0d0` paragraph.
-- `PROGRESS WOULD LOOK LIKE` + paragraph.
-- Footer row: `EDIT` (underlined, white) left; `+ PROJECT` / `CANCEL` (`#8a8a8a`) right.
+---
 
-**Edit mode** (replaces card body): title input (Archivo 600 18px); **Category** chip picker — one of `hobby · health · career · finances · relationship` (selected = white fill/black text; else 1px `#333`); `Why it matters` textarea; `Progress would look like` textarea; **Connected projects** toggle chips; hint line; `SAVE` (white, flex) + `CANCEL` (outlined); for existing priorities also `SET THIS ONE ASIDE FOR NOW` text button. Title is required (hint: `Give it a title first, even a rough one.`).
+## Data model changes (`src/domain/model.ts`, Firestore)
 
-Below cards, if < 3 active: dashed add button `+ PRIORITY · ROOM FOR 1 MORE` (or `+ FIRST PRIORITY FOR THIS QUARTER`).
-
-### 6. Backburner
-Header `BACKBURNER` / `3 IDEAS`. Same list container as Deathcookies.
-- Row: min-height 56, padding `6px 6px 6px 16px`. Text 15px `#d0d0d0` (flex 1); `PRIORITISE` mono 11px text button; `×` 44×44 button `#6a6a6a` (hover white) removes.
-- Add row: placeholder `An idea to think on…`, `ADD`.
-- `PRIORITISE` opens the Change Focus sheet.
-
-### 7. Set aside (conditional)
-Header `SET ASIDE` + `Kept, with their notes.` Rows: bg `#0f0f0f`, border `#262626`, title 15px `#d0d0d0`, right `BRING BACK` (white) or `NO ROOM YET` (`#6a6a6a`, disabled) when 3 active.
-
-## Bottom sheets
-All: dim overlay `rgba(0,0,0,.7)` (fade 200ms); sheet bg `#0f0f0f`, top border 1px `#333`, padding `12px 20px 44px`, max-height 92–94%, scrollable; grabber 40×3 `#333`; slide-up 350ms `cubic-bezier(.2,.8,.2,1)` from translateY(32px). Tap overlay closes.
-
-**Change focus (promote from Backburner)**
-- Eyebrow `CHANGE FOCUS NOW`, H2 = the idea text (Archivo 700 22px).
-- If < 3 active: copy `There is room for one more priority this quarter…` + white `ADD AS PRIORITY III`.
-- If 3 active: copy `You are already holding three. To take this on now, set one aside. It keeps its notes and can come back at any review.` + one row per active priority with `SET ASIDE` → pauses that one, adds the idea.
-- After promoting: idea leaves Backburner, new priority opens straight into edit mode with hint `Pick a category and write down why it matters while it is fresh.`
-- `NOT NOW, KEEP IT HERE` closes.
-
-**Quarter review**
-- Eyebrow `QUARTER REVIEW`, H2 `LOOKING BACK ON QUARTER 2` (Archivo 800 28px uppercase), intro `{range}. For each priority: what happened, and whether to continue, adjust, or retire it. Nothing here is a verdict on you.`
-- Per active priority: title; `Progress was going to look like: …` (mono 12px); `What actually happened?` textarea; segmented `CONTINUE | ADJUST | RETIRE` (container 1px `#333` black; selected segment white/black); Adjust reveals `What changes next quarter?` input; Retire shows `Setting something down is a decision, not a failure. Its projects stay on the go.`
-- Summary `2 CONTINUE · 1 ADJUST · 0 RETIRE`, white `CLOSE Q2 · BEGIN Q3`, outlined `COME BACK LATER`.
-- On close: retired priorities removed (their projects unlinked, kept); adjusted ones store the change note as `adjust`; decisions saved to history; quarter key marked closed so UI advances to the next quarter.
-
-**Birthday** (sheet exists in prototype; entry point was removed — add one in Settings / onboarding): date input, live preview `Today falls in Year 24 · Quarter 2 · August 1 – October 31, 2026`, `SAVE` / `CANCEL`. Reject future dates.
-
-## Notification
-- Daily local notification (prototype simulates it as an in-app banner 900ms after load; real app: user-chosen time, default 08:30).
-- Content: title `3 deathcookies to eat`, body `Start with: {first open deathcookie}`. Singular `1 deathcookie to eat`. Zero → `No deathcookies today` / `Plate is clean. Nothing urgent to eat.`
-- Banner style: 12px from sides, bg `rgba(22,22,22,.96)` + blur 12, 1px `#3a3a3a`, radius 14, shadow `0 12px 40px rgba(0,0,0,.6)`; enters translateY(−20px)→0 over 450ms; auto-dismiss 8s; tap dismisses.
-- **App icon:** solid black circle on white. In banner: 38×38 white tile radius 9 with 20×20 black circle.
-- App name everywhere: **Deathcookies**.
-
-## Date logic (critical)
+Add:
+```ts
+export interface Weekly { id: string; text: string; doneWeek: ISODate | null; createdAt: number; }
+export interface Rejection { id: string; n: number; date: ISODate; createdAt: number; } // n = 1..100
+export const REJECTION_TOTAL = 100;
+// PlannerState: + weeklies: Weekly[]; + rejections: Rejection[];
 ```
-yearStart = most recent occurrence of birthday (month/day) on or before today
-yearNumber = yearStart.year − birthYear
-quarterStarts = yearStart + 0, 3, 6, 9 months (clamp day to month length)
-quarter q = last start ≤ today; quarterEnd = nextStart − 1 day
-week of quarter = floor((dayOfQuarter − 1) / 7) + 1; total weeks = ceil(daysInQuarter / 7)
+Firestore:
 ```
-Birthday May 1 → Q1 May 1–Jul 31, Q2 Aug 1–Oct 31, Q3 Nov 1–Jan 31, Q4 Feb 1–Apr 30.
-Quarter review card window: today ≥ quarterEnd − 14 days.
+users/{uid}/weeklies/{id}     text, doneWeek, createdAt
+users/{uid}/rejections/{id}   n, date, createdAt
+```
+Domain commands (new `src/domain/weeklies.ts` and `src/domain/rejections.ts`, each with tests):
+- `addWeekly(text, ctx)`: trim the text; empty text returns `[]`.
+- `toggleWeekly(state, id, ctx)`: switch `doneWeek` between `mondayOf(ctx.now)` and `null`.
+- `removeWeekly(state, id)`
+- `isDoneThisWeek(w, today)` and `weeklySummary(state, today)`, which returns `{ done, total }`.
+- `logRejection(state, ctx)`: `n = max(n) + 1`, using the local date. Return `[]` when n would go past 100. Taking the max of `n` keeps two devices from both creating card N.
+- `rejectionProgress(state)`, which returns `{ done, current: number | null, percent }`.
 
-## State (persist all locally)
-- `birthday: 'YYYY-MM-DD'`
-- `priorities: [{id, title, category: 'hobby'|'health'|'career'|'finances'|'relationship', why, progress, status: 'active'|'paused', adjust?}]` — max 3 active
-- `projects: [{id, name, priorityId|null}]`
-- `activity: [{date, text, projectId}]` — drives "last activity" on project cards (prototype uses fixed sample; real app needs a way to log activity, e.g. tap a project → "log something")
-- `cookies: [{id, text, done}]`
-- `backburner: [{id, text, date}]`
-- `quarterReviews: [{date, decisions: [{title, decision, note}]}]`, `closedQuarterKeys: string[]`
-- `notificationTime: 'HH:MM'`, `notificationsOn: bool`
-- UI-only: `expanded{id:bool}`, `editingId`, `editDraft`, `addingProjectFor`, open sheet.
+Remove, along with their UI and tests: priorities, projects, activity, backburner, quarterReviews, `closedQuarterKeys`, `quarterReview.ts`, `priorities.ts`, `projects.ts` and `backburner.ts`. **Leave existing Firestore documents where they are.** Just stop reading them, so nothing is lost if this needs to be undone. The quarter maths in `dates.ts` stays, because the header still shows Year/Quarter and the week line.
+
+## Reminder
+No change. It still counts open deathcookies (`reminder.ts`). Weeklies and rejections aren't mentioned in it.
+
+## Sample content in the prototype
+- Weeklies: "Three runs, however short", "Call Nan", "Plan the week's meals", "One morning in the studio", "Inbox to zero".
+- Two rejections already done.
+
+All of this is placeholder. The real app starts empty.
 
 ## Design tokens
-Colors: bg `#000000` · surface `#0f0f0f` · surface-2 `#161616` · border `#262626` · border-2 `#2a2a2a` · input border `#333333` · dashed `#3a3a3a` · text `#f5f5f5` · text-2 `#d0d0d0` · muted `#a8a8a8` · faint `#8a8a8a` · disabled `#6a6a6a` · primary button `#f5f5f5` (hover `#ffffff`) on `#000`.
-Type: **Archivo** (Google Fonts; 600/700/800) for headings/body; **JetBrains Mono** (400/500/600) for labels, meta, buttons. Body 15px/1.5. Inputs 16px (prevents iOS zoom).
-Radii: 4 (cards), 3 (inputs/buttons/sub-cards), 2 (tags/checkbox/segments), 14 (notification), 9 (icon tile).
-Spacing: section gap 24 · list gap 10 · card padding 14–16 · sheet padding 20.
-Touch targets: ≥ 44px everywhere.
-Motion: fade-in on mount 350ms ease-out (opacity + 6px rise); sheet 350ms cubic-bezier(.2,.8,.2,1); chevron 200ms.
-
-## Assets
-None — no images or icon files. Icon is a black circle on white (generate 1024×1024 for the app icon). Fonts from Google Fonts.
+These are unchanged; use `src/ui/styles.css` `:root`:
+- **Colours:** bg #000, surface #0f0f0f, surface-2 #161616, hover #141414, border #262626, border-2 #2a2a2a, input-border #333, dashed #3a3a3a, text #f5f5f5, text-2 #d0d0d0, muted #a8a8a8, faint #8a8a8a, disabled #6a6a6a.
+- **Type:** Archivo (400–800) for UI, JetBrains Mono (400–600) for labels.
+- **Radii:** 4px for cards and lists, 3px for buttons and inputs, 2px for checkboxes.
 
 ## Files
-- `Deathcookies.dc.html` — the full prototype (template + logic class with all data, date math and handlers). Ignore the `frame` / `scenario` / `showReminder` props; they're prototype-only toggles. Some removed screens (weekly review, past reviews) still have dead logic in the class — don't implement them.
-- `ios-frame.jsx` — prototype-only iPhone bezel. Not part of the app.
-- `support.js` — prototype runtime. Not part of the app.
+- `Deathcookies.dc.html`: the prototype. Its logic class at the bottom of the file contains the reference implementation of the week-reset and card-numbering rules.
+- `ios-frame.jsx`: the phone frame used for previewing only; don't ship it.
+- `support.js`: the runtime the prototype needs to open in a browser.

@@ -3,6 +3,20 @@
 Source of truth for look and behaviour: the design handoff (`docs/design/`).
 Working rules: `docs/agent.md`.
 
+## What the app is (since the 2026-10-09 handoff)
+
+Two tabs, switched by a bottom tab bar:
+
+- **Today**: date, year/quarter and week line, quote of the day, Deathcookies
+  (urgent to-dos, kept with created/completed/cleared times), and **Weeklies**
+  (a recurring checklist whose ticks clear every Monday).
+- **Rejection Therapy**: 100 numbered cards, done one at a time.
+
+Plus Quotes (saved quotes, also from screenshots via an iOS Shortcut),
+Settings, and the daily reminder. Priorities, projects, the backburner and the
+quarter review were removed in that update; their Firestore documents were left
+in place (no longer read), so the change can be undone without data loss.
+
 ## Requirements
 
 - Runs on a phone **and** a laptop, with the same data on both.
@@ -40,11 +54,11 @@ for the GitHub deploy, not an admin key.
 ```
 src/
   domain/      Pure TypeScript. No React, no Firebase.
-               dates.ts      birthday year, quarters, week line
-               planner.ts    entity types, rules (max 3 priorities, promote, close quarter …)
+               model.ts      entity types
+               dates.ts      birthday year, quarters, week line, Mondays
+               cookies.ts, weeklies.ts, rejections.ts, quotes.ts, settings.ts   rules
                changes.ts    Change type + applyChanges()
                reminder.ts   notification text + "is it due now?" (shared with the server)
-               quotes.ts
   data/        Persistence behind PlannerRepository { subscribe, apply(changes) }.
                memoryRepository.ts      tests + local dev
                firestoreRepository.ts   the real database
@@ -59,21 +73,23 @@ public/        manifest, icons, service worker (offline shell + push display)
 
 Domain commands take the current state and return a list of `Change`s
 (`put` / `delete` a document, `patch` settings). The repository applies a list
-atomically (a Firestore batched write), so multi-step actions such as closing a
-quarter or promoting an idea never half-apply.
+atomically (a Firestore batched write), so a multi-step action never half-applies.
+
+- **Weeklies reset rule**: each item stores `doneWeek`, the Monday of the week it
+  was ticked (local time, weeks start Monday). It counts as done only while
+  `doneWeek === mondayOf(today)`, so nothing has to run on Monday.
+- **Rejection cards**: the next card is `max(n) + 1`, and a card's document id is
+  its number (`no-003`), so two devices doing the same card write one document.
 
 ### Firestore layout
 
 ```
 users/{uid}                     settings: birthday, timeZone, notificationsOn,
-                                notificationTime, closedQuarterKeys, lastReminderDate
+                                notificationTime, lastReminderDate
 users/{uid}/cookies/{id}        text, done, createdAt, completedAt, clearedAt (never deleted;
                                 cleared ones are hidden from the list). Times are timestamps.
-users/{uid}/priorities/{id}     title, category, why, progress, status, adjust?, createdAt
-users/{uid}/projects/{id}       name, priorityId | null, createdAt
-users/{uid}/activity/{id}       date, text, projectId
-users/{uid}/backburner/{id}     text, date, createdAt
-users/{uid}/quarterReviews/{id} date, quarterKey, decisions[]
+users/{uid}/weeklies/{id}       text, doneWeek (ISO Monday | null), createdAt
+users/{uid}/rejections/{id}     n (1–100), date, createdAt; id = no-NNN
 users/{uid}/quotes/{id}         text, by, createdAt — the quote of the day rotates through
                                 these (classics only while there are none)
 users/{uid}/pushSubscriptions/{id}  endpoint, keys, createdAt
@@ -81,19 +97,20 @@ users/{uid}/pushSubscriptions/{id}  endpoint, keys, createdAt
 
 Security rules: a signed-in user can read and write only `users/{their uid}/**`.
 
+No longer read (left in place by the 2026-10-09 update): `priorities`,
+`projects`, `activity`, `backburner`, `quarterReviews`, and the
+`closedQuarterKeys` field.
+
 ## Additions the handoff asks for (not in the prototype)
 
 - **Settings sheet**: birthday (the prototype's birthday sheet), daily reminder
   on/off and time, "turn on notifications on this device", sign out. Entry
   point: a `SETTINGS` text button at the foot of the home screen.
 - **Onboarding**: first sign-in asks for the birthday.
-- **Logging activity**: tap a project card → inline "Log something" field.
-  Drives the "last activity" line (`THU · 5 km in the rain`; nothing in the past
-  7 days → `Quiet last week`).
 - Starts empty: the prototype's sample content is placeholder data.
 
-Not built (dead logic in the prototype): weekly Monday review, past-reviews
-screen, backburner "flag for review".
+Not built (dead logic in the first prototype): weekly Monday review,
+past-reviews screen, backburner "flag for review".
 
 ## Testing
 

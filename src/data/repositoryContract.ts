@@ -36,7 +36,7 @@ export function repositoryContract(makeRepo: () => PlannerRepository) {
     const sub = latest(repo);
     sub.unsubscribe();
     const before = sub.seen.length;
-    await repo.apply([put('backburner', { id: 'i1', text: 'Idea', date: '2026-10-07', createdAt: 1 })]);
+    await repo.apply([put('weeklies', { id: 'w1', text: 'Call Nan', doneWeek: null, createdAt: 1 })]);
     expect(sub.seen.length).toBe(before);
   });
 }

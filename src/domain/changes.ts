@@ -1,20 +1,17 @@
 // Commands describe their effect as a list of Changes. Repositories persist a
 // list atomically; applyChanges is the reference meaning of that list.
-import type { Activity, Cookie, Idea, PlannerState, Priority, Project, QuarterReview, SavedQuote, Settings } from './model';
+import type { Cookie, PlannerState, Rejection, SavedQuote, Settings, Weekly } from './model';
 
 export interface Collections {
   cookies: Cookie;
-  priorities: Priority;
-  projects: Project;
-  activity: Activity;
-  backburner: Idea;
-  quarterReviews: QuarterReview;
+  weeklies: Weekly;
+  rejections: Rejection;
   quotes: SavedQuote;
 }
 
 export type CollectionName = keyof Collections;
 
-export const COLLECTION_NAMES: readonly CollectionName[] = ['cookies', 'priorities', 'projects', 'activity', 'backburner', 'quarterReviews', 'quotes'];
+export const COLLECTION_NAMES: readonly CollectionName[] = ['cookies', 'weeklies', 'rejections', 'quotes'];
 
 export type PutChange = { [C in CollectionName]: { op: 'put'; collection: C; value: Collections[C] } }[CollectionName];
 export type DeleteChange = { op: 'delete'; collection: CollectionName; id: string };

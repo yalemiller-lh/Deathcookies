@@ -1,11 +1,6 @@
 // The planner's data, as stored. Every entity has a stable string id.
 import type { ISODate } from './dates';
 
-export const CATEGORIES = ['hobby', 'health', 'career', 'finances', 'relationship'] as const;
-export type Category = (typeof CATEGORIES)[number];
-
-export const MAX_ACTIVE_PRIORITIES = 3;
-
 export interface Settings {
   /** null until onboarding asks for it. */
   birthday: ISODate | null;
@@ -14,7 +9,6 @@ export interface Settings {
   notificationsOn: boolean;
   /** 'HH:MM', 24-hour. */
   notificationTime: string;
-  closedQuarterKeys: string[];
   /** Local date the last daily reminder went out. Written by the reminder sender, never by the app. */
   lastReminderDate: ISODate | null;
 }
@@ -31,57 +25,24 @@ export interface Cookie {
   clearedAt: number | null;
 }
 
-export type PriorityStatus = 'active' | 'paused';
-
-export interface Priority {
-  id: string;
-  title: string;
-  category: Category | null;
-  why: string;
-  progress: string;
-  status: PriorityStatus;
-  /** The change agreed at the last quarter review, when it was "adjust". */
-  adjust: string | null;
-  createdAt: number;
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  priorityId: string | null;
-  createdAt: number;
-}
-
-export interface Activity {
-  id: string;
-  projectId: string;
-  date: ISODate;
-  text: string;
-  createdAt: number;
-}
-
-export interface Idea {
+/** Something to do every week. Its tick clears itself when a new week starts. */
+export interface Weekly {
   id: string;
   text: string;
-  date: ISODate;
+  /** The Monday of the week it was ticked; it counts as done only during that week. */
+  doneWeek: ISODate | null;
   createdAt: number;
 }
 
-export type Decision = 'continue' | 'adjust' | 'retire';
+export const REJECTION_TOTAL = 100;
 
-export interface PriorityDecision {
-  priorityId: string;
-  title: string;
-  decision: Decision;
-  outcome: string;
-  change: string;
-}
-
-export interface QuarterReview {
+/** One completed Rejection Therapy card. */
+export interface Rejection {
   id: string;
-  quarterKey: string;
+  /** Card number, 1–100. */
+  n: number;
+  /** Local date it was done. */
   date: ISODate;
-  decisions: PriorityDecision[];
   createdAt: number;
 }
 
@@ -97,22 +58,19 @@ export interface SavedQuote {
 export interface PlannerState {
   settings: Settings;
   cookies: Cookie[];
-  priorities: Priority[];
-  projects: Project[];
-  activity: Activity[];
-  backburner: Idea[];
-  quarterReviews: QuarterReview[];
+  weeklies: Weekly[];
+  rejections: Rejection[];
   quotes: SavedQuote[];
 }
 
 export const DEFAULT_NOTIFICATION_TIME = '08:30';
 
 export function defaultSettings(timeZone: string): Settings {
-  return { birthday: null, timeZone, notificationsOn: false, notificationTime: DEFAULT_NOTIFICATION_TIME, closedQuarterKeys: [], lastReminderDate: null };
+  return { birthday: null, timeZone, notificationsOn: false, notificationTime: DEFAULT_NOTIFICATION_TIME, lastReminderDate: null };
 }
 
 export function emptyState(timeZone = 'UTC'): PlannerState {
-  return { settings: defaultSettings(timeZone), cookies: [], priorities: [], projects: [], activity: [], backburner: [], quarterReviews: [], quotes: [] };
+  return { settings: defaultSettings(timeZone), cookies: [], weeklies: [], rejections: [], quotes: [] };
 }
 
 /** What a command needs from the outside world, injected so rules stay testable. */

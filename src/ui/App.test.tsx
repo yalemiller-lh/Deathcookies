@@ -8,7 +8,6 @@ import { memoryRepository } from '../data/memoryRepository';
 import { localDevices } from '../data/localRepository';
 import { deviceAuth, type AuthService, type Session } from '../services/auth';
 import type { PushService } from '../services/push';
-import { priority } from '../test/fixtures';
 import { App } from './App';
 
 const fakePush: PushService = { status: () => 'unsupported', enable: async () => 'unsupported', showNow: async () => {} };
@@ -136,73 +135,67 @@ describe('deathcookies', () => {
   });
 });
 
-describe('priorities', () => {
-  it('creates a priority with a category, and requires a title', async () => {
+describe('weeklies', () => {
+  it('adds weeklies, ticks them for this week and removes them', async () => {
     const { user, repo } = setup();
-    await user.click(screen.getByRole('button', { name: '+ First priority for this quarter' }));
-    await user.click(screen.getByRole('button', { name: 'Save' }));
-    expect(screen.getByText('Give it a title first, even a rough one.')).toBeInTheDocument();
+    const weeklies = section('Weeklies');
+    await user.type(within(weeklies).getByLabelText('New weekly'), 'LinkedIn post{Enter}');
+    await user.type(within(weeklies).getByLabelText('New weekly'), 'Substack{Enter}');
+    expect(within(weeklies).getByText('0 of 2')).toBeInTheDocument();
+    expect(within(weeklies).getByText('Resets Monday, October 12')).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText('Priority title'), 'Keep running');
-    await user.click(screen.getByRole('radio', { name: 'health' }));
-    await user.type(screen.getByLabelText('Why it matters'), 'Clear head');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(within(weeklies).getByRole('checkbox', { name: 'Substack' }));
+    expect(within(weeklies).getByText('1 of 2')).toBeInTheDocument();
+    expect(repo.snapshot().weeklies.find(w => w.text === 'Substack')?.doneWeek).toBe('2026-10-05');
 
-    expect(repo.snapshot().priorities).toMatchObject([{ title: 'Keep running', category: 'health', why: 'Clear head', status: 'active' }]);
-    expect(screen.getByText('1 of 3')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '+ Priority · room for 2 more' })).toBeInTheDocument();
+    await user.click(within(weeklies).getByRole('button', { name: 'Remove LinkedIn post' }));
+    expect(repo.snapshot().weeklies.map(w => w.text)).toEqual(['Substack']);
   });
 
-  it('expands a card, adds a project and logs activity on it', async () => {
-    const { user, repo } = setup({ priorities: [priority('p1', { title: 'Studio' })] });
-    await user.click(screen.getByRole('button', { name: /Studio/ }));
-    expect(screen.getByText('No projects connected yet.')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: '+ Project' }));
-    await user.type(screen.getByLabelText('Project name'), 'Electrics{Enter}');
-    await user.click(screen.getByRole('button', { name: /Electrics\. Quiet last week/ }));
-    await user.type(screen.getByLabelText('Log something on Electrics'), 'Sockets wired{Enter}');
-    expect(screen.getByText('WED · Sockets wired')).toBeInTheDocument();
-    expect(repo.snapshot().activity).toMatchObject([{ text: 'Sockets wired', date: '2026-10-07' }]);
+  it('shows last week’s ticks as open in a new week', () => {
+    setup({ weeklies: [{ id: 'w1', text: 'Call Nan', doneWeek: '2026-09-28', createdAt: 1 }] });
+    expect(within(section('Weeklies')).getByRole('checkbox', { name: 'Call Nan' })).toHaveAttribute('aria-checked', 'false');
   });
 });
 
-describe('backburner', () => {
-  it('promotes an idea by setting a priority aside, then opens it for editing', async () => {
-    const { user, repo } = setup({
-      priorities: [priority('a', { title: 'Alpha' }), priority('b', { title: 'Beta' }), priority('c', { title: 'Gamma' })],
-      backburner: [{ id: 'i1', text: 'Woodworking course', date: '2026-10-03', createdAt: 1 }],
-    });
-    await user.click(screen.getByRole('button', { name: 'Make "Woodworking course" a priority' }));
-    const dialog = screen.getByRole('dialog', { name: 'Woodworking course' });
-    await user.click(within(dialog).getByRole('button', { name: /Beta/ }));
+describe('rejection therapy', () => {
+  it('opens from the tab bar and submits cards one at a time', async () => {
+    const { user, repo } = setup();
+    await user.click(screen.getByRole('tab', { name: 'Rejection Therapy' }));
+    expect(screen.getByRole('tab', { name: 'Rejection Therapy' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.getByText('100 nos to go')).toBeInTheDocument();
+    expect(screen.getByRole('form', { name: 'Card No. 01' })).toBeInTheDocument();
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByText('Pick a category and write down why it matters while it is fresh.')).toBeInTheDocument();
-    expect(within(section('Set aside')).getByText('Beta')).toBeInTheDocument();
-    expect(within(section('Set aside')).getByRole('button', { name: 'No room yet' })).toBeDisabled();
-    expect(repo.snapshot().backburner).toEqual([]);
-  });
-});
-
-describe('quarter review', () => {
-  it('appears in the last two weeks and closes the quarter', async () => {
-    const { user, repo } = setup({ priorities: [priority('a', { title: 'Alpha' }), priority('b', { title: 'Beta' })] }, '2026-10-29');
-    await user.click(screen.getByRole('button', { name: /Quarter 2 closes Saturday, October 31/ }));
-    const dialog = screen.getByRole('dialog', { name: 'Looking back on quarter 2' });
-    await user.click(within(dialog).getAllByRole('radio', { name: 'retire' })[1]!);
-    expect(within(dialog).getByText('1 continue · 0 adjust · 1 retire')).toBeInTheDocument();
-    await user.click(within(dialog).getByRole('button', { name: 'Close Q2 · begin Q3' }));
-
-    expect(screen.getByText('Quarter 2 is closed.')).toBeInTheDocument();
-    expect(screen.getByText('Quarter 3 begins November 1 with 1 priority carried forward. Choose the rest when you are ready.')).toBeInTheDocument();
-    expect(screen.getByText('Year 24 · Quarter 3')).toBeInTheDocument();
-    expect(screen.getByText('Quarter begins in 1 week')).toBeInTheDocument();
-    expect(repo.snapshot().priorities.map(p => p.title)).toEqual(['Alpha']);
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(screen.getByText('2%')).toBeInTheDocument();
+    expect(screen.getByText('2 done')).toBeInTheDocument();
+    expect(screen.getByRole('form', { name: 'Card No. 03' })).toBeInTheDocument();
+    expect(repo.snapshot().rejections.map(r => [r.n, r.date])).toEqual([[1, '2026-10-07'], [2, '2026-10-07']]);
+    // Done cards sit at the bottom with their date; upcoming ones above them.
+    const rows = within(screen.getByLabelText('All cards')).getAllByText(/^No\. /).map(el => el.textContent);
+    expect(rows.slice(0, 2)).toEqual(['No. 04', 'No. 05']);
+    expect(rows.slice(-2)).toEqual(['No. 01', 'No. 02']);
+    expect(within(screen.getByLabelText('All cards')).getAllByText('Oct 7')).toHaveLength(2);
   });
 
-  it('is hidden earlier in the quarter', () => {
-    setup({}, '2026-10-07');
-    expect(screen.queryByRole('button', { name: /closes/ })).not.toBeInTheDocument();
+  it('says so when all hundred are done', async () => {
+    const rejections = Array.from({ length: 100 }, (_, i) => ({ id: `no-${i + 1}`, n: i + 1, date: '2026-10-05', createdAt: i }));
+    const { user } = setup({ rejections });
+    await user.click(screen.getByRole('tab', { name: 'Rejection Therapy' }));
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('All one hundred')).toBeInTheDocument();
+    expect(screen.getByText("A hundred no's.")).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument();
+  });
+
+  it('keeps 1 no to go singular', async () => {
+    const rejections = Array.from({ length: 99 }, (_, i) => ({ id: `no-${i + 1}`, n: i + 1, date: '2026-10-05', createdAt: i }));
+    const { user } = setup({ rejections });
+    await user.click(screen.getByRole('tab', { name: 'Rejection Therapy' }));
+    expect(screen.getByText('1 no to go')).toBeInTheDocument();
+    expect(screen.getByRole('form', { name: 'Card No. 100' })).toBeInTheDocument();
   });
 });
 

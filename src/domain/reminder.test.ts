@@ -52,9 +52,9 @@ describe('settings', () => {
     expect(checkBirthday('2002-02-30', today)).toBe('invalid');
   });
 
-  it('changing the birthday clears closed-quarter marks', () => {
-    const out = setBirthday(stateWith({}, { closedQuarterKeys: ['24-1'] }), '2002-06-15', today);
-    expect(out).toEqual({ ok: true, changes: [{ op: 'settings', patch: { birthday: '2002-06-15', closedQuarterKeys: [] } }] });
+  it('saves a changed birthday', () => {
+    const out = setBirthday(stateWith(), '2002-06-15', today);
+    expect(out).toEqual({ ok: true, changes: [{ op: 'settings', patch: { birthday: '2002-06-15' } }] });
   });
 
   it('validates reminder time and zone', () => {
