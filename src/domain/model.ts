@@ -41,6 +41,8 @@ export interface Rejection {
   id: string;
   /** Card number, 1–100. */
   n: number;
+  /** What was asked for, and what they said. */
+  text: string;
   /** Local date it was done. */
   date: ISODate;
   createdAt: number;

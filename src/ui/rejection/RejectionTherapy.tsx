@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { parseISODate } from '../../domain/dates';
 import { REJECTION_TOTAL } from '../../domain/model';
 import { doneCards, logRejection, rejectionProgress } from '../../domain/rejections';
@@ -9,15 +9,24 @@ import { usePlanner } from '../PlannerContext';
 /** 'No. 03'; card 100 is 'No. 100'. */
 const cardLabel = (n: number) => `No. ${String(n).padStart(2, '0')}`;
 
-/** The Rejection Therapy tab: 100 numbered cards, done one at a time. */
+/** The Rejection Therapy tab: 100 numbered cards, filled in one at a time. */
 export function RejectionTherapy() {
   const { state, run, ctx } = usePlanner();
   const { done, current, percent } = rejectionProgress(state);
   const upcoming = current === null ? [] : Array.from({ length: REJECTION_TOTAL - current }, (_, i) => current + 1 + i);
+  const [text, setText] = useState('');
+  const [hint, setHint] = useState('');
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    run(logRejection(state, ctx()));
+    const out = logRejection(state, text, ctx());
+    if (!out.ok) {
+      setHint(out.error === 'text-required' ? 'Write down what you asked for first.' : 'All hundred are done.');
+      return;
+    }
+    run(out.changes);
+    setText('');
+    setHint('');
   };
 
   return (
@@ -36,6 +45,9 @@ export function RejectionTherapy() {
               <span className="checkbox" aria-hidden="true" />
               <span className="rej-no rej-no--current">{cardLabel(current)}</span>
             </div>
+            <textarea className="input" rows={3} value={text} onChange={e => { setText(e.target.value); setHint(''); }}
+              placeholder="What you asked for, and what they said" aria-label={`What happened for ${cardLabel(current)}`} />
+            {hint && <span className="hint" role="alert">{hint}</span>}
             <button type="submit" className="btn-primary full">Submit</button>
           </form>
         ) : (
@@ -54,9 +66,12 @@ export function RejectionTherapy() {
           {doneCards(state).map(r => (
             <div key={r.id} className="rej-row rej-row--done">
               <span className="checkbox is-on" aria-hidden="true" />
-              <div className="rej-done-line">
-                <span className="rej-no">{cardLabel(r.n)}</span>
-                <span className="rej-date">{shortDate(parseISODate(r.date))}</span>
+              <div className="rej-done">
+                <div className="rej-done-line">
+                  <span className="rej-no">{cardLabel(r.n)}</span>
+                  <span className="rej-date">{shortDate(parseISODate(r.date))}</span>
+                </div>
+                {r.text && <span className="rej-text">{r.text}</span>}
               </div>
             </div>
           ))}

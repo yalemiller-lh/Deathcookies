@@ -34,7 +34,7 @@ describe('times', () => {
 describe('reading documents', () => {
   it('restores the id and fills missing or invalid fields', () => {
     expect(entityFromDoc('weeklies', 'w1', { text: 'Call Nan', doneWeek: 7 })).toEqual({ id: 'w1', text: 'Call Nan', doneWeek: null, createdAt: 0 });
-    expect(entityFromDoc('rejections', 'no-002', { n: 2, date: '2026-10-05' })).toEqual({ id: 'no-002', n: 2, date: '2026-10-05', createdAt: 0 });
+    expect(entityFromDoc('rejections', 'no-002', { n: 2, date: '2026-10-05' })).toEqual({ id: 'no-002', n: 2, text: '', date: '2026-10-05', createdAt: 0 });
     expect(entityFromDoc('cookies', 'c1', { text: 'Pay', done: 'yes' })).toEqual(cookie('c1', 'Pay', { createdAt: 0 }));
   });
 

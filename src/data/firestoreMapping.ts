@@ -40,7 +40,7 @@ export function entityFromDoc<C extends CollectionName>(collection: C, id: strin
   const read: { [K in CollectionName]: () => Collections[K] } = {
     cookies: () => ({ id, text: str(data.text), done: data.done === true, createdAt, completedAt: millisOrNull(data.completedAt), clearedAt: millisOrNull(data.clearedAt) }),
     weeklies: () => ({ id, text: str(data.text), doneWeek: strOrNull(data.doneWeek), createdAt }),
-    rejections: () => ({ id, n: typeof data.n === 'number' ? data.n : 0, date: str(data.date), createdAt }),
+    rejections: () => ({ id, n: typeof data.n === 'number' ? data.n : 0, text: str(data.text), date: str(data.date), createdAt }),
     quotes: () => ({ id, text: str(data.text), by: str(data.by), createdAt }),
   };
   return read[collection]() as Collections[C];

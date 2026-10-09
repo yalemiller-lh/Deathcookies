@@ -159,7 +159,7 @@ describe('weeklies', () => {
 });
 
 describe('rejection therapy', () => {
-  it('opens from the tab bar and submits cards one at a time', async () => {
+  it('opens from the tab bar and fills in cards one at a time', async () => {
     const { user, repo } = setup();
     await user.click(screen.getByRole('tab', { name: 'Rejection Therapy' }));
     expect(screen.getByRole('tab', { name: 'Rejection Therapy' })).toHaveAttribute('aria-selected', 'true');
@@ -168,11 +168,18 @@ describe('rejection therapy', () => {
     expect(screen.getByRole('form', { name: 'Card No. 01' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Write down what you asked for first.');
+    expect(repo.snapshot().rejections).toEqual([]);
+
+    await user.type(screen.getByLabelText('What happened for No. 01'), 'Asked for a free refill. A polite no.');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    await user.type(screen.getByLabelText('What happened for No. 02'), 'Asked to stock my zine.');
     await user.click(screen.getByRole('button', { name: 'Submit' }));
     expect(screen.getByText('2%')).toBeInTheDocument();
     expect(screen.getByText('2 done')).toBeInTheDocument();
     expect(screen.getByRole('form', { name: 'Card No. 03' })).toBeInTheDocument();
-    expect(repo.snapshot().rejections.map(r => [r.n, r.date])).toEqual([[1, '2026-10-07'], [2, '2026-10-07']]);
+    expect(repo.snapshot().rejections.map(r => [r.n, r.text, r.date])).toEqual([[1, 'Asked for a free refill. A polite no.', '2026-10-07'], [2, 'Asked to stock my zine.', '2026-10-07']]);
+    expect(within(screen.getByLabelText('All cards')).getByText('Asked for a free refill. A polite no.')).toBeInTheDocument();
     // Done cards sit at the bottom with their date; upcoming ones above them.
     const rows = within(screen.getByLabelText('All cards')).getAllByText(/^No\. /).map(el => el.textContent);
     expect(rows.slice(0, 2)).toEqual(['No. 04', 'No. 05']);
@@ -181,7 +188,7 @@ describe('rejection therapy', () => {
   });
 
   it('says so when all hundred are done', async () => {
-    const rejections = Array.from({ length: 100 }, (_, i) => ({ id: `no-${i + 1}`, n: i + 1, date: '2026-10-05', createdAt: i }));
+    const rejections = Array.from({ length: 100 }, (_, i) => ({ id: `no-${i + 1}`, n: i + 1, text: 'No', date: '2026-10-05', createdAt: i }));
     const { user } = setup({ rejections });
     await user.click(screen.getByRole('tab', { name: 'Rejection Therapy' }));
     expect(screen.getByText('100%')).toBeInTheDocument();
@@ -191,7 +198,7 @@ describe('rejection therapy', () => {
   });
 
   it('keeps 1 no to go singular', async () => {
-    const rejections = Array.from({ length: 99 }, (_, i) => ({ id: `no-${i + 1}`, n: i + 1, date: '2026-10-05', createdAt: i }));
+    const rejections = Array.from({ length: 99 }, (_, i) => ({ id: `no-${i + 1}`, n: i + 1, text: 'No', date: '2026-10-05', createdAt: i }));
     const { user } = setup({ rejections });
     await user.click(screen.getByRole('tab', { name: 'Rejection Therapy' }));
     expect(screen.getByText('1 no to go')).toBeInTheDocument();
